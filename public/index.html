@@ -98,6 +98,11 @@
     .setting-group select, .setting-group input { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; width: 100%; outline: none; }
     .setting-group select:focus, .setting-group input:focus { border-color: var(--blue); }
     
+    #countdown-wrap { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 6px; }
+    .cd-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 18px; width: 44px; height: 44px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+    .cd-btn:hover { background: var(--text); color: var(--bg); }
+    #cd-display { font-size: 16px; font-weight: 700; }
+    
     .btn-primary { background: var(--green); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
     .btn-primary:hover { transform: translateY(-2px); opacity: 0.9;}
     .btn-secondary { background: var(--blue); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
@@ -130,10 +135,11 @@
     </div>
     
     <div class="toggles">
-      <!-- NEW: History Button -->
+      <!-- History Button -->
       <button id="btn-open-history" title="History & Data">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       </button>
+      <!-- Create Room Button -->
       <button id="btn-open-create" title="Create New Private Room">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
       </button>
@@ -194,7 +200,7 @@
   </div>
 </div>
 
-<!-- Settings Modal -->
+<!-- RESTORED: Settings Modal with Countdown Time Option -->
 <div id="settings-modal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -207,8 +213,22 @@
     </div>
     <div class="setting-group">
       <label>Timer Mode</label>
-      <select id="mode-select"><option value="stopwatch">Stopwatch (Count Up)</option><option value="countdown">Countdown (Count Down)</option></select>
+      <select id="mode-select">
+        <option value="stopwatch">Stopwatch (Count Up)</option>
+        <option value="countdown">Countdown (Count Down)</option>
+      </select>
     </div>
+    
+    <!-- This is the Start From section that was accidentally removed! -->
+    <div class="setting-group" id="countdown-settings" style="display:none;">
+      <label>Start From</label>
+      <div id="countdown-wrap">
+        <button class="cd-btn" id="cd-minus">-</button>
+        <span id="cd-display">1 min</span>
+        <button class="cd-btn" id="cd-plus">+</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -257,7 +277,8 @@
   const socket = io({ query: { room: roomName, about: aboutQuery } });
   
   let state = {}; let isHost = false; let raf = null; let timeOffset = 0; 
-  let myHistory = []; // Array to store saved sessions
+  let myHistory = []; 
+  let cdVal = 1; // Restored Countdown Variable
 
   // DOM
   const $hh = document.getElementById('hh'); const $hColon = document.getElementById('h-colon');
@@ -268,10 +289,13 @@
   const $start = document.getElementById('btn-start'); const $stop = document.getElementById('btn-stop');
   const $lap = document.getElementById('btn-lap'); const $reset = document.getElementById('btn-reset');
   
-  // Modals
+  // Modals & Settings UI
   const $settingsModal = document.getElementById('settings-modal');
   const $createModal = document.getElementById('create-modal');
   const $historyModal = document.getElementById('history-modal');
+  const $modeSelect = document.getElementById('mode-select');
+  const $cdSettings = document.getElementById('countdown-settings');
+  const $cdDisplay = document.getElementById('cd-display');
 
   // History / Sync Logic
   let storagePref = localStorage.getItem('storagePref') || 'local';
@@ -323,7 +347,6 @@
     $historyList.innerHTML = '';
     if(myHistory.length === 0) { $historyList.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">No sessions saved yet.</div>'; return; }
     
-    // Show newest first
     [...myHistory].reverse().forEach(session => {
       const t = formatTime(session.time);
       const timeStr = `${t.h !== '00' ? t.h+':' : ''}${t.m}:${t.s}.${t.msec}`;
@@ -340,7 +363,6 @@
     });
   }
 
-  // Save Session Button
   document.getElementById('btn-save-session').onclick = () => {
     const currentElapsed = state.isRunning ? state.elapsed + (Date.now() + timeOffset - state.startTime) : state.elapsed;
     if (currentElapsed <= 0) return alert("Start the timer before saving a session!");
@@ -350,7 +372,6 @@
     alert("Session saved to " + (storagePref === 'local' ? "Device!" : "Cloud!"));
   };
 
-  // Export & Import
   document.getElementById('btn-export').onclick = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(myHistory));
     const dlAnchorElem = document.createElement('a');
@@ -373,7 +394,7 @@
       } catch(err) { alert("Error reading file."); }
     };
     reader.readAsText(file);
-    $fileImport.value = ''; // reset
+    $fileImport.value = ''; 
   };
 
   // Modal Triggers
@@ -515,7 +536,13 @@
     $stop.classList.toggle('active', state.isRunning);
     $glow.style.background = state.isRunning ? 'var(--green)' : state.elapsed > 0 ? 'var(--red)' : 'transparent';
     
-    document.getElementById('mode-select').value = state.mode;
+    $modeSelect.value = state.mode;
+    
+    // RESTORED: Update UI for Countdown Settings
+    cdVal = state.countdownDuration / 60000;
+    $cdDisplay.textContent = cdVal + ' min';
+    $cdSettings.style.display = state.mode === 'countdown' ? 'flex' : 'none';
+
     renderLaps(state.laps);
     if (raf) cancelAnimationFrame(raf);
     
@@ -533,7 +560,18 @@
   $stop.onclick  = () => { unlockAudio(); socket.emit('stop'); };
   $lap.onclick   = () => { unlockAudio(); socket.emit('lap'); };
   $reset.onclick = () => { unlockAudio(); socket.emit('reset'); };
+  
   document.getElementById('perm-select').onchange = (e) => socket.emit('set_permission', e.target.value);
+  
+  // RESTORED: Countdown Event Listeners
+  $modeSelect.onchange = (e) => socket.emit('set_mode', { mode: e.target.value, duration: cdVal * 60000 });
+  
+  document.getElementById('cd-minus').onclick = () => {
+    if(cdVal > 1) { cdVal--; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); }
+  };
+  document.getElementById('cd-plus').onclick = () => {
+    if(cdVal < 60) { cdVal++; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); }
+  };
   
   document.getElementById('btn-theme').onclick = () => {
     const root = document.documentElement;
