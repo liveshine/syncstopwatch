@@ -28,31 +28,32 @@ const saveDB = () => {
 };
 
 io.on('connection', socket => {
-  // 1. Latency Synchronization (Ping/Pong)
+  // Latency Synchronization (Ping/Pong)
   socket.on('sync_ping', (clientTime) => {
     socket.emit('sync_pong', { clientTime, serverTime: Date.now() });
   });
 
-  // 2. Rooms Integration
+  // Rooms Integration
   const roomId = socket.handshake.query.room || 'main';
   socket.join(roomId);
 
   if (!rooms.has(roomId)) {
     rooms.set(roomId, {
       host: socket.id,
+      permission: 'host_only', 
       isRunning: false,
       startTime: null,
       elapsed: 0,
       laps: [],
       mode: 'stopwatch',
-      countdownDuration: 60000 // 1 minute default
+      countdownDuration: 60000 
     });
     saveDB();
   }
 
   const room = rooms.get(roomId);
 
-  // 3. Role-Based Permissions (Assign host if room is empty)
+  // Role-Based Permissions (Assign host if room is empty)
   if (!room.host || !io.sockets.sockets.get(room.host)) {
     room.host = socket.id;
     saveDB();
@@ -66,8 +67,11 @@ io.on('connection', socket => {
 
   broadcast();
 
+  // Helper function to check if a user is allowed to control the timer
+  const canControl = (id) => room.permission === 'anyone' || id === room.host;
+
   socket.on('start', () => {
-    if (socket.id !== room.host || room.isRunning) return;
+    if (!canControl(socket.id) || room.isRunning) return;
     room.startTime = Date.now() - room.elapsed;
     room.isRunning = true;
     io.to(roomId).emit('audio_cue', 'start');
@@ -75,7 +79,7 @@ io.on('connection', socket => {
   });
 
   socket.on('stop', () => {
-    if (socket.id !== room.host || !room.isRunning) return;
+    if (!canControl(socket.id) || !room.isRunning) return;
     room.elapsed = Date.now() - room.startTime;
     room.isRunning = false;
     io.to(roomId).emit('audio_cue', 'stop');
@@ -83,7 +87,7 @@ io.on('connection', socket => {
   });
 
   socket.on('lap', () => {
-    if (socket.id !== room.host || !room.isRunning) return;
+    if (!canControl(socket.id) || !room.isRunning) return;
     const current = Date.now() - room.startTime;
     room.laps.push(current);
     io.to(roomId).emit('audio_cue', 'lap');
@@ -91,7 +95,7 @@ io.on('connection', socket => {
   });
 
   socket.on('reset', () => {
-    if (socket.id !== room.host) return;
+    if (!canControl(socket.id)) return;
     room.startTime = null;
     room.isRunning = false;
     room.elapsed = 0;
@@ -101,7 +105,7 @@ io.on('connection', socket => {
   });
 
   socket.on('set_mode', (data) => {
-    if (socket.id !== room.host) return;
+    if (!canControl(socket.id)) return;
     room.mode = data.mode;
     if (data.duration) room.countdownDuration = data.duration;
     room.startTime = null;
@@ -111,10 +115,17 @@ io.on('connection', socket => {
     broadcast();
   });
 
+  // Listener to handle permission changes
+  socket.on('set_permission', (perm) => {
+    if (socket.id !== room.host) return; // Only the host can change this
+    room.permission = perm;
+    broadcast();
+  });
+
   socket.on('disconnect', () => {
     const clients = io.sockets.adapter.rooms.get(roomId);
     if (room.host === socket.id && clients && clients.size > 0) {
-      room.host = [...clients][0]; // Pass host to the next user in line
+      room.host = [...clients][0]; // Pass host to the next user
     }
     broadcast();
   });
