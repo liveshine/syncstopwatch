@@ -317,7 +317,7 @@
           </div>
         </details>
 
-        <!-- Data Management (Import / Export Moved Here) -->
+        <!-- Data Management -->
         <details class="setting-group">
           <summary>
             <div class="summary-title">
@@ -441,6 +441,15 @@
     currentPage = index;
     $swipeWrapper.style.transform = `translateX(-${index * 100}vw)`;
     navItems.forEach((btn, i) => btn.classList.toggle('active', i === index));
+    
+    // Hide the top header on all pages except the Timer (page 1)
+    const topBar = document.getElementById('top-bar-container');
+    if (index === 1) {
+      topBar.style.display = 'flex';
+    } else {
+      topBar.style.display = 'none';
+    }
+    
     if(index === 2) setTimeout(() => $inputRoomName.focus(), 300);
   }
   
