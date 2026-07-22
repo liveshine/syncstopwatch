@@ -113,16 +113,8 @@
 
     #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
 
-    /* --- COLLAPSIBLE SETTINGS --- */
-    details.collapsible {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      width: 100%;
-      margin-bottom: 12px;
-      overflow: hidden;
-    }
-    details.collapsible summary {
+    /* --- COLLAPSIBLE SETTINGS (Seamless native styling) --- */
+    details.setting-group summary {
       font-size: 12px;
       font-weight: 700;
       color: var(--text-muted);
@@ -130,27 +122,25 @@
       letter-spacing: 0.1em;
       cursor: pointer;
       list-style: none; /* Hide default arrow */
-      padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       user-select: none;
-      background: var(--surface);
+      outline: none;
     }
-    details.collapsible summary::-webkit-details-marker { display: none; }
-    details.collapsible summary::after {
+    details.setting-group summary::-webkit-details-marker { display: none; }
+    details.setting-group summary::after {
       content: '▼';
       font-size: 10px;
       transition: transform 0.3s ease;
     }
-    details.collapsible[open] summary::after {
+    details.setting-group[open] summary::after {
       transform: rotate(180deg);
     }
-    .collapsible-content {
-      padding: 16px;
+    details.setting-group .collapsible-inner {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
     }
   </style>
 </head>
@@ -183,25 +173,6 @@
       <h2 class="page-header">History</h2>
       <div class="page-content-wrapper">
         
-        <details class="collapsible">
-          <summary>Save Destination</summary>
-          <div class="collapsible-content">
-            <select id="storage-select">
-              <option value="local">Local Device (Browser)</option>
-              <option value="cloud">Cloud Storage</option>
-            </select>
-            
-            <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
-              ⚠️ <strong>Warning:</strong> Local data is saved only on this browser.
-            </p>
-            <div class="setting-group" id="cloud-id-group" style="display: none;">
-              <label>Cloud Sync ID</label>
-              <input type="text" id="cloud-sync-id" autocomplete="off">
-              <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
-            </div>
-          </div>
-        </details>
-
         <div style="display: flex; gap: 10px;">
           <button id="btn-export" class="btn-primary" style="background: var(--blue);">Export JSON</button>
           <button id="btn-import-trigger" class="btn-primary" style="background: var(--text-muted);">Import JSON</button>
@@ -261,9 +232,9 @@
       <h2 class="page-header">Settings</h2>
       <div class="page-content-wrapper">
         
-        <details class="collapsible" id="perm-group" style="display:none; flex-direction:column;">
+        <details class="setting-group" id="perm-group" style="display:none;">
           <summary>Permissions (Host Only)</summary>
-          <div class="collapsible-content">
+          <div class="collapsible-inner">
             <select id="perm-select">
               <option value="host_only">Host Only (Just Me)</option>
               <option value="anyone">Everyone (Co-Hosts)</option>
@@ -278,6 +249,7 @@
             <option value="countdown">Countdown (Count Down)</option>
           </select>
         </div>
+        
         <div class="setting-group" id="countdown-settings" style="display:none;">
           <label>Start From</label>
           <div id="countdown-wrap">
@@ -287,11 +259,28 @@
           </div>
         </div>
 
-        <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
-        
-        <details class="collapsible">
+        <details class="setting-group" open>
+          <summary>Save Destination</summary>
+          <div class="collapsible-inner">
+            <select id="storage-select">
+              <option value="local">Local Device (Browser)</option>
+              <option value="cloud">Cloud Storage</option>
+            </select>
+            
+            <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
+              ⚠️ <strong>Warning:</strong> Local data is saved only on this browser.
+            </p>
+            <div class="setting-group" id="cloud-id-group" style="display: none;">
+              <label>Cloud Sync ID</label>
+              <input type="text" id="cloud-sync-id" autocomplete="off">
+              <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="setting-group">
           <summary>App Preferences</summary>
-          <div class="collapsible-content">
+          <div class="collapsible-inner">
             <button id="btn-theme" class="btn-secondary">
               <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
               Toggle Light/Dark Theme
