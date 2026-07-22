@@ -38,9 +38,7 @@
     .role-host { color: var(--green); }
     .role-viewer { color: var(--text-muted); }
     .sep { color: var(--border); margin: 0 2px; }
-    
     #about-display { font-size: 12px; color: var(--text-muted); padding: 0 16px; display: none; }
-
     #btn-share { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; border-radius: 100px; cursor: pointer; font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
     #btn-share:hover { background: var(--surface-hover); border-color: var(--text-muted); }
 
@@ -89,23 +87,28 @@
     /* --- MODALS --- */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: all 0.3s ease; }
     .modal-overlay.show { opacity: 1; pointer-events: all; }
-    .modal-content { background: var(--surface); border: 1px solid var(--border); width: min(90%, 400px); padding: 32px; border-radius: 24px; display: flex; flex-direction: column; gap: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .modal-content { max-height: 90vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); width: min(90%, 420px); padding: 32px; border-radius: 24px; display: flex; flex-direction: column; gap: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .modal-overlay.show .modal-content { transform: translateY(0) scale(1); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; }
     .modal-header h2 { font-size: 20px; font-weight: 700; }
-    .btn-close { background: var(--bg); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-close { background: var(--bg); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
     .btn-close:hover { background: var(--text); color: var(--bg); }
     .setting-group { display: flex; flex-direction: column; gap: 10px; }
     .setting-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-    .setting-group select, .setting-group input { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; width: 100%; outline: none; cursor: pointer; }
+    .setting-group select, .setting-group input { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; width: 100%; outline: none; }
     .setting-group select:focus, .setting-group input:focus { border-color: var(--blue); }
-    #countdown-wrap { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 6px; }
-    .cd-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 18px; width: 44px; height: 44px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
-    .cd-btn:hover { background: var(--text); color: var(--bg); }
-    #cd-display { font-size: 16px; font-weight: 700; }
     
-    .btn-primary { background: var(--green); color: var(--bg); border: none; padding: 16px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 8px; }
-    .btn-primary:hover { background: #10b981; transform: translateY(-2px); }
+    .btn-primary { background: var(--green); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); opacity: 0.9;}
+    .btn-secondary { background: var(--blue); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-secondary:hover { transform: translateY(-2px); opacity: 0.9;}
+
+    /* History List Styles */
+    .history-card { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px;}
+    .history-card-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+    .history-card-body { display: flex; justify-content: space-between; align-items: baseline; }
+    .history-card-time { font-size: 18px; font-weight: bold; }
+    .history-card-laps { font-size: 12px; color: var(--blue); background: var(--blue-bg); padding: 2px 8px; border-radius: 8px;}
 
     #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
   </style>
@@ -127,7 +130,10 @@
     </div>
     
     <div class="toggles">
-      <!-- Create Room Button -->
+      <!-- NEW: History Button -->
+      <button id="btn-open-history" title="History & Data">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </button>
       <button id="btn-open-create" title="Create New Private Room">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
       </button>
@@ -145,6 +151,49 @@
   <div id="about-display"></div>
 </div>
 
+<!-- History & Data Modal -->
+<div id="history-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>History & Data</h2>
+      <button class="btn-close" id="btn-close-history"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+    </div>
+    
+    <div class="setting-group">
+      <label>Save Location</label>
+      <select id="storage-select">
+        <option value="local">Device Storage (Local)</option>
+        <option value="cloud">Cloud Storage (Sync)</option>
+      </select>
+      <p id="local-warning" style="color: var(--red); font-size: 11px; margin-top: 4px;">⚠️ Warning: If you clear browser data or delete the app, device storage will be permanently lost.</p>
+    </div>
+
+    <!-- Sync Key Input (Only visible when Cloud is selected) -->
+    <div class="setting-group" id="cloud-key-group" style="display:none;">
+      <label>Your Cloud Sync Key (Enter on other devices to sync)</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="input-sync-key">
+        <button class="btn-primary" id="btn-update-key" style="margin-top:0; border-radius: 12px; padding: 0 16px;">Set</button>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      <button id="btn-export" class="btn-secondary">Export JSON</button>
+      <button id="btn-import-trigger" class="btn-secondary">Import JSON</button>
+      <input type="file" id="file-import" accept=".json" style="display:none;">
+    </div>
+    
+    <button id="btn-save-session" class="btn-primary" style="width:100%;">Save Current Session</button>
+
+    <div class="setting-group" style="margin-top: 12px;">
+      <label>Past Sessions</label>
+      <div id="history-list">
+        <!-- History cards will render here -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Settings Modal -->
 <div id="settings-modal" class="modal-overlay">
   <div class="modal-content">
@@ -154,30 +203,16 @@
     </div>
     <div class="setting-group" id="perm-group">
       <label>Permissions</label>
-      <select id="perm-select">
-        <option value="host_only">Host Only (Just Me)</option>
-        <option value="anyone">Everyone (Co-Hosts)</option>
-      </select>
+      <select id="perm-select"><option value="host_only">Host Only (Just Me)</option><option value="anyone">Everyone (Co-Hosts)</option></select>
     </div>
     <div class="setting-group">
       <label>Timer Mode</label>
-      <select id="mode-select">
-        <option value="stopwatch">Stopwatch (Count Up)</option>
-        <option value="countdown">Countdown (Count Down)</option>
-      </select>
-    </div>
-    <div class="setting-group" id="countdown-settings" style="display:none;">
-      <label>Start From</label>
-      <div id="countdown-wrap">
-        <button class="cd-btn" id="cd-minus">-</button>
-        <span id="cd-display">1 min</span>
-        <button class="cd-btn" id="cd-plus">+</button>
-      </div>
+      <select id="mode-select"><option value="stopwatch">Stopwatch (Count Up)</option><option value="countdown">Countdown (Count Down)</option></select>
     </div>
   </div>
 </div>
 
-<!-- NEW: Create Room Modal -->
+<!-- Create Room Modal -->
 <div id="create-modal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -197,12 +232,7 @@
 </div>
 
 <div class="timer-container">
-  <div id="timer">
-    <span id="hh">00</span><span class="colon" id="h-colon">:</span>
-    <span id="mm">00</span><span class="colon">:</span>
-    <span id="ss">00</span>
-    <span class="frac">.<span id="ms">000</span></span>
-  </div>
+  <div id="timer"><span id="hh">00</span><span class="colon" id="h-colon">:</span><span id="mm">00</span><span class="colon">:</span><span id="ss">00</span><span class="frac">.<span id="ms">000</span></span></div>
 </div>
 
 <div id="controls">
@@ -222,100 +252,168 @@
   const urlParams = new URLSearchParams(window.location.search);
   const roomName = urlParams.get('room') || 'main';
   const aboutQuery = urlParams.get('about') || '';
-  
-  // Clean up display name (replace hyphens with spaces for visual)
   document.getElementById('room-display').textContent = roomName.replace(/-/g, ' ');
 
-  // Pass 'about' back to server if it exists in URL
   const socket = io({ query: { room: roomName, about: aboutQuery } });
   
-  let state = {};
-  let isHost = false;
-  let raf = null;
-  let timeOffset = 0; 
+  let state = {}; let isHost = false; let raf = null; let timeOffset = 0; 
+  let myHistory = []; // Array to store saved sessions
 
-  const $hh = document.getElementById('hh');
-  const $hColon = document.getElementById('h-colon');
-  const $mm = document.getElementById('mm');
-  const $ss = document.getElementById('ss');
-  const $ms = document.getElementById('ms');
-  const $glow = document.getElementById('glow');
-  const $laps = document.getElementById('laps');
-  const $aboutDisplay = document.getElementById('about-display');
+  // DOM
+  const $hh = document.getElementById('hh'); const $hColon = document.getElementById('h-colon');
+  const $mm = document.getElementById('mm'); const $ss = document.getElementById('ss');
+  const $ms = document.getElementById('ms'); const $glow = document.getElementById('glow');
+  const $laps = document.getElementById('laps'); const $aboutDisplay = document.getElementById('about-display');
   
-  const $start = document.getElementById('btn-start');
-  const $stop = document.getElementById('btn-stop');
-  const $lap = document.getElementById('btn-lap');
-  const $reset = document.getElementById('btn-reset');
+  const $start = document.getElementById('btn-start'); const $stop = document.getElementById('btn-stop');
+  const $lap = document.getElementById('btn-lap'); const $reset = document.getElementById('btn-reset');
   
+  // Modals
   const $settingsModal = document.getElementById('settings-modal');
-  const $btnSettings = document.getElementById('btn-settings');
-  const $btnCloseSettings = document.getElementById('btn-close-settings');
-  const $permSelect = document.getElementById('perm-select');
-  const $modeSelect = document.getElementById('mode-select');
-  const $cdSettings = document.getElementById('countdown-settings');
-  const $cdDisplay = document.getElementById('cd-display');
-  
   const $createModal = document.getElementById('create-modal');
-  const $btnOpenCreate = document.getElementById('btn-open-create');
-  const $btnCloseCreate = document.getElementById('btn-close-create');
-  const $btnSubmitRoom = document.getElementById('btn-submit-room');
-  const $inputRoomName = document.getElementById('input-room-name');
-  const $inputRoomAbout = document.getElementById('input-room-about');
-  
-  let cdVal = 1; 
+  const $historyModal = document.getElementById('history-modal');
 
-  // Modal Listeners
-  $btnSettings.onclick = () => $settingsModal.classList.add('show');
-  $btnCloseSettings.onclick = () => $settingsModal.classList.remove('show');
+  // History / Sync Logic
+  let storagePref = localStorage.getItem('storagePref') || 'local';
+  let syncKey = localStorage.getItem('syncKey');
+  if (!syncKey) { syncKey = Math.random().toString(36).substring(2, 10); localStorage.setItem('syncKey', syncKey); }
   
-  $btnOpenCreate.onclick = () => { $createModal.classList.add('show'); $inputRoomName.focus(); };
-  $btnCloseCreate.onclick = () => $createModal.classList.remove('show');
+  const $storageSelect = document.getElementById('storage-select');
+  const $localWarning = document.getElementById('local-warning');
+  const $cloudKeyGroup = document.getElementById('cloud-key-group');
+  const $inputSyncKey = document.getElementById('input-sync-key');
+  const $historyList = document.getElementById('history-list');
+
+  $storageSelect.value = storagePref;
+  $inputSyncKey.value = syncKey;
   
-  // Close modals when clicking outside
+  function updateStorageUI() {
+    storagePref = $storageSelect.value;
+    localStorage.setItem('storagePref', storagePref);
+    if (storagePref === 'local') {
+      $localWarning.style.display = 'block';
+      $cloudKeyGroup.style.display = 'none';
+      loadLocalHistory();
+    } else {
+      $localWarning.style.display = 'none';
+      $cloudKeyGroup.style.display = 'flex';
+      socket.emit('get_cloud_history', syncKey);
+    }
+  }
+  $storageSelect.onchange = updateStorageUI;
+
+  document.getElementById('btn-update-key').onclick = () => {
+    const newKey = $inputSyncKey.value.trim();
+    if(newKey) { syncKey = newKey; localStorage.setItem('syncKey', syncKey); socket.emit('get_cloud_history', syncKey); }
+  };
+
+  function loadLocalHistory() {
+    try { myHistory = JSON.parse(localStorage.getItem('myHistory')) || []; } catch(e) { myHistory = []; }
+    renderHistory();
+  }
+  socket.on('cloud_history_data', (data) => { myHistory = data; renderHistory(); });
+  
+  function saveHistoryToDest() {
+    if (storagePref === 'local') { localStorage.setItem('myHistory', JSON.stringify(myHistory)); } 
+    else { socket.emit('save_cloud_history', { syncKey, data: myHistory }); }
+    renderHistory();
+  }
+
+  function renderHistory() {
+    $historyList.innerHTML = '';
+    if(myHistory.length === 0) { $historyList.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">No sessions saved yet.</div>'; return; }
+    
+    // Show newest first
+    [...myHistory].reverse().forEach(session => {
+      const t = formatTime(session.time);
+      const timeStr = `${t.h !== '00' ? t.h+':' : ''}${t.m}:${t.s}.${t.msec}`;
+      const div = document.createElement('div');
+      div.className = 'history-card';
+      div.innerHTML = `
+        <div class="history-card-header"><span>${session.date}</span><span>${session.room}</span></div>
+        <div class="history-card-body">
+          <span class="history-card-time">${timeStr}</span>
+          ${session.laps.length > 0 ? `<span class="history-card-laps">${session.laps.length} Laps</span>` : ''}
+        </div>
+      `;
+      $historyList.appendChild(div);
+    });
+  }
+
+  // Save Session Button
+  document.getElementById('btn-save-session').onclick = () => {
+    const currentElapsed = state.isRunning ? state.elapsed + (Date.now() + timeOffset - state.startTime) : state.elapsed;
+    if (currentElapsed <= 0) return alert("Start the timer before saving a session!");
+    
+    myHistory.push({ id: Date.now(), date: new Date().toLocaleString(), room: roomName, time: currentElapsed, laps: [...state.laps] });
+    saveHistoryToDest();
+    alert("Session saved to " + (storagePref === 'local' ? "Device!" : "Cloud!"));
+  };
+
+  // Export & Import
+  document.getElementById('btn-export').onclick = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(myHistory));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", `stopwatch_data_${Date.now()}.json`);
+    dlAnchorElem.click();
+  };
+  
+  const $fileImport = document.getElementById('file-import');
+  document.getElementById('btn-import-trigger').onclick = () => $fileImport.click();
+  $fileImport.onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) { myHistory = imported; saveHistoryToDest(); alert("Data imported successfully!"); } 
+        else { alert("Invalid data format."); }
+      } catch(err) { alert("Error reading file."); }
+    };
+    reader.readAsText(file);
+    $fileImport.value = ''; // reset
+  };
+
+  // Modal Triggers
+  document.getElementById('btn-open-history').onclick = () => { updateStorageUI(); $historyModal.classList.add('show'); };
+  document.getElementById('btn-close-history').onclick = () => $historyModal.classList.remove('show');
+  
+  document.getElementById('btn-settings').onclick = () => $settingsModal.classList.add('show');
+  document.getElementById('btn-close-settings').onclick = () => $settingsModal.classList.remove('show');
+  
+  document.getElementById('btn-open-create').onclick = () => { $createModal.classList.add('show'); document.getElementById('input-room-name').focus(); };
+  document.getElementById('btn-close-create').onclick = () => $createModal.classList.remove('show');
+  
   document.querySelectorAll('.modal-overlay').forEach(modal => {
     modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
   });
 
-  // NEW: Submit Room Creation
-  $btnSubmitRoom.onclick = () => {
-    // Replaces all spaces with hyphens so URLs are clean (e.g. ?room=My-Cool-Room)
-    const rawName = $inputRoomName.value.trim();
-    const cleanName = rawName.replace(/\s+/g, '-'); 
-    const aboutText = $inputRoomAbout.value.trim();
-    
+  // Room Creation
+  document.getElementById('btn-submit-room').onclick = () => {
+    const cleanName = document.getElementById('input-room-name').value.trim().replace(/\s+/g, '-'); 
+    const aboutText = document.getElementById('input-room-about').value.trim();
     if (!cleanName) return alert("Please enter a Room Name.");
-    
     let newUrl = `?room=${encodeURIComponent(cleanName)}`;
     if (aboutText) newUrl += `&about=${encodeURIComponent(aboutText)}`;
-    
     window.location.href = newUrl;
   };
 
-  // Allow pressing Enter key to submit room
-  $inputRoomName.addEventListener("keypress", (e) => { if (e.key === "Enter") $btnSubmitRoom.click(); });
-  $inputRoomAbout.addEventListener("keypress", (e) => { if (e.key === "Enter") $btnSubmitRoom.click(); });
-
+  // Audio Logic
   const AudioContext = window.AudioContext || window.webkitAudioContext;
-  const audioCtx = new AudioContext();
-  let audioEnabled = true;
-
+  const audioCtx = new AudioContext(); let audioEnabled = true;
   document.getElementById('btn-audio').onclick = (e) => {
-    audioEnabled = !audioEnabled;
-    const btn = e.currentTarget;
+    audioEnabled = !audioEnabled; const btn = e.currentTarget;
     if (audioEnabled) {
-        btn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>`;
-        btn.style.opacity = "1";
+        btn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>`; btn.style.opacity = "1";
     } else {
-        btn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>`;
-        btn.style.opacity = "0.5";
+        btn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>`; btn.style.opacity = "0.5";
     }
   };
-
   function playTone(type) {
     if (!audioEnabled || audioCtx.state === 'suspended') return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
     if (type === 'start') { osc.frequency.value = 880; osc.type = 'sine'; }
     if (type === 'stop') { osc.frequency.value = 440; osc.type = 'square'; }
@@ -326,14 +424,15 @@
     osc.start(); osc.stop(audioCtx.currentTime + 0.3);
   }
 
+  // Copy Link
   const $btnShare = document.getElementById('btn-share');
   $btnShare.onclick = () => {
     navigator.clipboard.writeText(window.location.href);
     const span = $btnShare.querySelector('span');
-    span.textContent = 'COPIED!';
-    setTimeout(() => span.textContent = 'COPY', 2000);
+    span.textContent = 'COPIED!'; setTimeout(() => span.textContent = 'COPY', 2000);
   };
 
+  // Sync Logic
   function syncLatency() { socket.emit('sync_ping', Date.now()); }
   socket.on('sync_pong', (data) => {
     const rtt = Date.now() - data.clientTime;
@@ -352,11 +451,8 @@
 
   function display(ms) {
     const t = formatTime(ms);
-    if (t.h === '00') {
-      $hh.style.display = 'none'; $hColon.style.display = 'none';
-    } else {
-      $hh.style.display = 'inline'; $hColon.style.display = 'inline';
-    }
+    if (t.h === '00') { $hh.style.display = 'none'; $hColon.style.display = 'none'; } 
+    else { $hh.style.display = 'inline'; $hColon.style.display = 'inline'; }
     $hh.textContent = t.h; $mm.textContent = t.m;
     $ss.textContent = t.s; $ms.textContent = t.msec;
   }
@@ -366,23 +462,15 @@
     if (lapsArr.length === 0) return;
     const splits = lapsArr.map((lap, i) => i === 0 ? lap : lap - lapsArr[i-1]);
     let minSplit = Infinity, maxSplit = -Infinity;
-    if (lapsArr.length > 1) {
-      minSplit = Math.min(...splits); maxSplit = Math.max(...splits);
-    }
+    if (lapsArr.length > 1) { minSplit = Math.min(...splits); maxSplit = Math.max(...splits); }
     lapsArr.forEach((lapMs, i) => {
-      const splitMs = splits[i];
-      const tTot = formatTime(lapMs);
-      const tSplt = formatTime(splitMs);
+      const splitMs = splits[i]; const tTot = formatTime(lapMs); const tSplt = formatTime(splitMs);
       const li = document.createElement('li');
       if (lapsArr.length > 1) {
         if (splitMs === minSplit) li.className = 'fastest';
         if (splitMs === maxSplit) li.className = 'slowest';
       }
-      li.innerHTML = `
-        <span class="lap-num">Lap ${i + 1}</span>
-        <span class="lap-split">+${tSplt.m}:${tSplt.s}.${tSplt.msec}</span>
-        <span class="lap-tot">${tTot.h !== '00' ? tTot.h+':' : ''}${tTot.m}:${tTot.s}.${tTot.msec}</span>
-      `;
+      li.innerHTML = `<span class="lap-num">Lap ${i + 1}</span><span class="lap-split">+${tSplt.m}:${tSplt.s}.${tSplt.msec}</span><span class="lap-tot">${tTot.h !== '00' ? tTot.h+':' : ''}${tTot.m}:${tTot.s}.${tTot.msec}</span>`;
       $laps.appendChild(li);
     });
   }
@@ -393,15 +481,9 @@
       let currentElapsed = state.elapsed + (now - state.startTime);
       if (state.mode === 'countdown') {
         let remaining = state.countdownDuration - currentElapsed;
-        if (remaining <= 0) {
-          remaining = 0;
-          if (isHost) socket.emit('stop'); 
-          playTone('finish');
-        }
+        if (remaining <= 0) { remaining = 0; if (isHost) socket.emit('stop'); playTone('finish'); }
         display(remaining);
-      } else {
-        display(currentElapsed);
-      }
+      } else { display(currentElapsed); }
     }
     raf = requestAnimationFrame(tick);
   }
@@ -414,17 +496,12 @@
     document.getElementById('role-display').textContent = isHost ? 'Host' : (canControl ? 'Co-Host' : 'Viewer');
     document.getElementById('role-display').className = isHost ? 'role-host' : (canControl ? 'role-host' : 'role-viewer');
     
-    // NEW: Display the "About" text if it exists
-    if (state.about) {
-        $aboutDisplay.textContent = state.about;
-        $aboutDisplay.style.display = 'block';
-    } else {
-        $aboutDisplay.style.display = 'none';
-    }
+    if (state.about) { $aboutDisplay.textContent = state.about; $aboutDisplay.style.display = 'block'; } 
+    else { $aboutDisplay.style.display = 'none'; }
 
     $btnSettings.style.display = canControl ? 'flex' : 'none';
     document.getElementById('perm-group').style.display = isHost ? 'flex' : 'none';
-    $permSelect.value = state.permission;
+    document.getElementById('perm-select').value = state.permission;
 
     if (canControl) {
       $start.disabled = state.isRunning || (state.mode === 'countdown' && state.elapsed >= state.countdownDuration);
@@ -438,21 +515,14 @@
     $stop.classList.toggle('active', state.isRunning);
     $glow.style.background = state.isRunning ? 'var(--green)' : state.elapsed > 0 ? 'var(--red)' : 'transparent';
     
-    $modeSelect.value = state.mode;
-    cdVal = state.countdownDuration / 60000;
-    $cdDisplay.textContent = cdVal + ' min';
-    $cdSettings.style.display = state.mode === 'countdown' ? 'flex' : 'none';
-
+    document.getElementById('mode-select').value = state.mode;
     renderLaps(state.laps);
     if (raf) cancelAnimationFrame(raf);
-    if (state.isRunning) {
-      raf = requestAnimationFrame(tick);
-    } else {
-      if (state.mode === 'countdown') {
-        display(Math.max(0, state.countdownDuration - state.elapsed));
-      } else {
-        display(state.elapsed);
-      }
+    
+    if (state.isRunning) { raf = requestAnimationFrame(tick); } 
+    else {
+      if (state.mode === 'countdown') { display(Math.max(0, state.countdownDuration - state.elapsed)); } 
+      else { display(state.elapsed); }
     }
   });
 
@@ -463,21 +533,14 @@
   $stop.onclick  = () => { unlockAudio(); socket.emit('stop'); };
   $lap.onclick   = () => { unlockAudio(); socket.emit('lap'); };
   $reset.onclick = () => { unlockAudio(); socket.emit('reset'); };
-
-  $permSelect.onchange = (e) => socket.emit('set_permission', e.target.value);
-  $modeSelect.onchange = (e) => socket.emit('set_mode', { mode: e.target.value, duration: cdVal * 60000 });
+  document.getElementById('perm-select').onchange = (e) => socket.emit('set_permission', e.target.value);
   
-  document.getElementById('cd-minus').onclick = () => {
-    if(cdVal > 1) { cdVal--; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); }
-  };
-  document.getElementById('cd-plus').onclick = () => {
-    if(cdVal < 60) { cdVal++; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); }
-  };
-
   document.getElementById('btn-theme').onclick = () => {
     const root = document.documentElement;
     root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   };
+  
+  updateStorageUI(); // Init Storage UI
 </script>
 </body>
 </html>
