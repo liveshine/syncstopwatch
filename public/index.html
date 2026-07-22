@@ -112,6 +112,46 @@
     .history-item-laps { font-size: 13px; color: var(--text-muted); }
 
     #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
+
+    /* --- COLLAPSIBLE SETTINGS --- */
+    details.collapsible {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    details.collapsible summary {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      list-style: none; /* Hide default arrow */
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      background: var(--surface);
+    }
+    details.collapsible summary::-webkit-details-marker { display: none; }
+    details.collapsible summary::after {
+      content: '▼';
+      font-size: 10px;
+      transition: transform 0.3s ease;
+    }
+    details.collapsible[open] summary::after {
+      transform: rotate(180deg);
+    }
+    .collapsible-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
@@ -142,7 +182,34 @@
     <div class="page" id="page-history">
       <h2 class="page-header">History</h2>
       <div class="page-content-wrapper">
-        <div class="setting-group">
+        
+        <details class="collapsible">
+          <summary>Save Destination</summary>
+          <div class="collapsible-content">
+            <select id="storage-select">
+              <option value="local">Local Device (Browser)</option>
+              <option value="cloud">Cloud Storage</option>
+            </select>
+            
+            <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
+              ⚠️ <strong>Warning:</strong> Local data is saved only on this browser.
+            </p>
+            <div class="setting-group" id="cloud-id-group" style="display: none;">
+              <label>Cloud Sync ID</label>
+              <input type="text" id="cloud-sync-id" autocomplete="off">
+              <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
+            </div>
+          </div>
+        </details>
+
+        <div style="display: flex; gap: 10px;">
+          <button id="btn-export" class="btn-primary" style="background: var(--blue);">Export JSON</button>
+          <button id="btn-import-trigger" class="btn-primary" style="background: var(--text-muted);">Import JSON</button>
+          <input type="file" id="file-import" accept=".json" style="display: none;">
+        </div>
+
+        <div class="setting-group" style="margin-top: 10px;">
+          <label>Saved Runs</label>
           <ul id="history-list" style="list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0;"></ul>
         </div>
         <button id="btn-clear-history" class="btn-primary" style="background: var(--red); margin-top: 20px;">Clear All History</button>
@@ -193,13 +260,17 @@
     <div class="page" id="page-settings">
       <h2 class="page-header">Settings</h2>
       <div class="page-content-wrapper">
-        <div class="setting-group" id="perm-group" style="display:none;">
-          <label>Permissions (Host Only)</label>
-          <select id="perm-select">
-            <option value="host_only">Host Only (Just Me)</option>
-            <option value="anyone">Everyone (Co-Hosts)</option>
-          </select>
-        </div>
+        
+        <details class="collapsible" id="perm-group" style="display:none; flex-direction:column;">
+          <summary>Permissions (Host Only)</summary>
+          <div class="collapsible-content">
+            <select id="perm-select">
+              <option value="host_only">Host Only (Just Me)</option>
+              <option value="anyone">Everyone (Co-Hosts)</option>
+            </select>
+          </div>
+        </details>
+
         <div class="setting-group" id="timer-settings-group" style="display:none;">
           <label>Timer Mode</label>
           <select id="mode-select">
@@ -218,47 +289,19 @@
 
         <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
         
-        <div class="setting-group">
-          <label>App Preferences</label>
-          <button id="btn-theme" class="btn-secondary">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-            Toggle Light/Dark Theme
-          </button>
-          <button id="btn-audio" class="btn-secondary">
-            <span id="audio-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg></span>
-            Toggle Audio Tones
-          </button>
-        </div>
-
-        <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
-
-        <!-- MOVED FROM HISTORY: Data & Storage Settings -->
-        <div class="setting-group">
-          <label>Save Destination</label>
-          <select id="storage-select">
-            <option value="local">Local Device (Browser)</option>
-            <option value="cloud">Cloud Storage</option>
-          </select>
-        </div>
-        
-        <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
-          ⚠️ <strong>Warning:</strong> Local data is saved only on this browser.
-        </p>
-        <div class="setting-group" id="cloud-id-group" style="display: none;">
-          <label>Cloud Sync ID</label>
-          <input type="text" id="cloud-sync-id" autocomplete="off">
-          <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
-        </div>
-
-        <div class="setting-group">
-          <label>Data Management</label>
-          <div style="display: flex; gap: 10px;">
-            <button id="btn-export" class="btn-primary" style="flex: 1; background: var(--blue);">Export JSON</button>
-            <button id="btn-import-trigger" class="btn-primary" style="flex: 1; background: var(--text-muted);">Import JSON</button>
-            <input type="file" id="file-import" accept=".json" style="display: none;">
+        <details class="collapsible">
+          <summary>App Preferences</summary>
+          <div class="collapsible-content">
+            <button id="btn-theme" class="btn-secondary">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+              Toggle Light/Dark Theme
+            </button>
+            <button id="btn-audio" class="btn-secondary">
+              <span id="audio-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg></span>
+              Toggle Audio Tones
+            </button>
           </div>
-        </div>
-
+        </details>
       </div>
     </div>
   </div>
@@ -266,7 +309,9 @@
 
 <nav id="bottom-nav">
   <button class="nav-item" onclick="goToPage(0)">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+    </svg>
     History
   </button>
   <button class="nav-item active" onclick="goToPage(1)">
@@ -342,6 +387,7 @@
     if(index === 2) setTimeout(() => $inputRoomName.focus(), 300);
   }
   
+  // Set initial view to Timer
   goToPage(1); 
 
   $swipeWrapper.addEventListener('touchstart', (e) => {
@@ -497,6 +543,7 @@
         $aboutDisplay.style.display = 'none';
     }
 
+    // Toggle setting blocks based on permission
     $permGroup.style.display = isHost ? 'flex' : 'none';
     $timerSettingsGroup.style.display = canControl ? 'flex' : 'none';
     $permSelect.value = state.permission;
@@ -554,7 +601,7 @@
   let historyData = [];
   let storageMode = localStorage.getItem('storageMode') || 'local';
   let cloudSyncKey = localStorage.getItem('cloudSyncKey') || Math.random().toString(36).substr(2, 9).toUpperCase();
-  let lastSavedElapsed = -1; 
+  let lastSavedElapsed = -1; // NEW: Track the last saved state to prevent duplicates
   
   localStorage.setItem('cloudSyncKey', cloudSyncKey);
   
@@ -616,11 +663,13 @@
   }
 
   $btnSaveRun.onclick = () => {
+    // Prevent saving if it's already saved or timer is at 0
     if (state.elapsed === 0 || state.elapsed === lastSavedElapsed) return;
     
     const t = formatTime(state.elapsed);
     const timeString = `${t.h !== '00' ? t.h + ':' : ''}${t.m}:${t.s}.${t.msec}`;
     
+    // NEW: Format date with 12-hour AM/PM format
     const timeFormatOpts = { hour: 'numeric', minute: '2-digit', hour12: true };
     const dateFormatted = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString('en-US', timeFormatOpts);
     
@@ -636,7 +685,7 @@
     historyData.unshift(newRecord); 
     persistHistory();
     
-    lastSavedElapsed = state.elapsed;
+    lastSavedElapsed = state.elapsed; // Update the tracking variable
     
     const originalText = $btnSaveRun.innerHTML;
     $btnSaveRun.innerHTML = 'SAVED!';
