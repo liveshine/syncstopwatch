@@ -195,10 +195,16 @@
 
 <div id="glow"></div>
 
-<!-- BULLETPROOF FIX: Load Socket.IO from a reliable external CDN instead of the local server -->
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-  const socket = io();
+  // UPGRADE 3: Aggressive reconnection settings to fight mobile network drops
+  const socket = io({
+    reconnection: true,
+    reconnectionDelay: 500,
+    reconnectionDelayMax: 2000,
+    reconnectionAttempts: Infinity
+  });
+
   const $mm    = document.getElementById('mm');
   const $ss    = document.getElementById('ss');
   const $ms    = document.getElementById('ms');
@@ -242,12 +248,29 @@
     }
   }
 
+  // UPGRADE 4: Instantly wake up connection and ask for time when phone screen turns on
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      if (!socket.connected) {
+        socket.connect();
+      }
+      socket.emit('request_state');
+    }
+  });
+
+  // UPGRADE 5: UI warns you instantly if your phone disconnected
   setInterval(() => {
-    const start = Date.now();
-    socket.emit('ping_check', start, () => {
-      const latency = Date.now() - start;
-      $ping.textContent = `PING: ${latency} ms`;
-    });
+    if (socket.connected) {
+      const start = Date.now();
+      socket.emit('ping_check', start, () => {
+        const latency = Date.now() - start;
+        $ping.textContent = `PING: ${latency} ms`;
+        $ping.style.color = 'rgba(255,255,255,.5)';
+      });
+    } else {
+      $ping.textContent = `DISCONNECTED`;
+      $ping.style.color = '#ef4444'; // Turns red when disconnected
+    }
   }, 2000); 
 
   socket.on('timer_state',   s   => apply(s.isRunning, s.startTime));
