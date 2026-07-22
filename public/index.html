@@ -20,6 +20,7 @@
       overflow: hidden;
     }
 
+    /* Original Connected Badge */
     #badge {
       position: absolute;
       top: 20px; right: 20px;
@@ -31,6 +32,24 @@
       padding: 8px 16px;
       border-radius: 999px;
     }
+    
+    /* New Ping/Latency Badge */
+    #ping-badge {
+      position: absolute;
+      top: 20px; left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .15em;
+      color: rgba(255,255,255,.5);
+    }
+
     .dot {
       width: 8px; height: 8px;
       border-radius: 50%;
@@ -137,6 +156,9 @@
 </head>
 <body>
 
+<!-- New Latency Badge -->
+<div id="ping-badge">PING: -- ms</div>
+
 <div id="badge">
   <div class="dot"></div>
   <span id="count">0 CONNECTED</span>
@@ -187,6 +209,7 @@
   const $start = document.getElementById('btn-start');
   const $stop  = document.getElementById('btn-stop');
   const $reset = document.getElementById('btn-reset');
+  const $ping  = document.getElementById('ping-badge'); // New element reference
 
   let raf = null, t0 = null, elapsed = 0;
 
@@ -220,6 +243,16 @@
       if (snap !== undefined) { elapsed = snap; display(snap); }
     }
   }
+
+  // --- NEW PING SCRIPT ---
+  setInterval(() => {
+    const start = Date.now();
+    socket.emit('ping_check', start, () => {
+      const latency = Date.now() - start;
+      $ping.textContent = `PING: ${latency} ms`;
+    });
+  }, 2000); // Updates the ping on the screen every 2 seconds
+  // -----------------------
 
   socket.on('timer_state',   s   => apply(s.isRunning, s.startTime));
   socket.on('timer_started', t   => apply(true, t));
