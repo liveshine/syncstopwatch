@@ -46,6 +46,7 @@
     #top-bar {
       width: 100%; max-width: 1000px; padding: 24px;
       display: flex; justify-content: space-between; align-items: center;
+      gap: 8px;
       z-index: 10;
     }
     
@@ -70,7 +71,6 @@
     }
     #btn-share:hover { background: var(--surface-hover); border-color: var(--text-muted); }
 
-    /* Fix for the stacked utility buttons */
     .toggles {
       display: flex; flex-direction: row; gap: 8px; align-items: center;
     }
@@ -82,6 +82,15 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     .toggles button:hover { background: var(--surface-hover); transform: translateY(-2px); }
+
+    /* MOBILE RESPONSIVE FIX */
+    @media (max-width: 480px) {
+      #top-bar { padding: 16px 12px; }
+      .room-badge { padding: 6px 10px; font-size: 11px; gap: 6px; }
+      #btn-share { padding: 4px 6px; font-size: 10px; }
+      .toggles button { width: 34px; height: 34px; font-size: 14px; }
+      #btn-share span { display: none; } /* Hides "COPY" text to save space */
+    }
 
     /* --- TIMER DISPLAY --- */
     .timer-container {
@@ -456,7 +465,8 @@
     document.getElementById('role-display').textContent = isHost ? 'Host' : (canControl ? 'Co-Host' : 'Viewer');
     document.getElementById('role-display').className = isHost ? 'role-host' : (canControl ? 'role-host' : 'role-viewer');
     
-    $btnSettings.style.display = canControl ? 'block' : 'none';
+    // JS FIX: Use 'flex' instead of 'block' to keep the SVG icon perfectly centered
+    $btnSettings.style.display = canControl ? 'flex' : 'none';
     document.getElementById('perm-group').style.display = isHost ? 'flex' : 'none';
     $permSelect.value = state.permission;
 
