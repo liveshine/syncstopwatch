@@ -93,6 +93,7 @@
     .modal-header h2 { font-size: 20px; font-weight: 700; }
     .btn-close { background: var(--bg); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
     .btn-close:hover { background: var(--text); color: var(--bg); }
+    
     .setting-group { display: flex; flex-direction: column; gap: 10px; }
     .setting-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
     .setting-group select, .setting-group input { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; width: 100%; outline: none; }
@@ -127,7 +128,6 @@
       <span id="room-display">Main</span>
       <span class="sep">/</span>
       <span id="role-display" class="role-viewer">Viewer</span>
-      
       <button id="btn-share" title="Copy Room Link">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
         <span>Copy</span>
@@ -135,72 +135,52 @@
     </div>
     
     <div class="toggles">
-      <!-- History Button -->
-      <button id="btn-open-history" title="History & Data">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-      </button>
-      <!-- Create Room Button -->
-      <button id="btn-open-create" title="Create New Private Room">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-      </button>
-      <button id="btn-audio" title="Toggle Audio">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>
-      </button>
-      <button id="btn-theme" title="Toggle Theme">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-      </button>
-      <button id="btn-settings" title="Settings" style="display:none;">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-      </button>
+      <button id="btn-open-history" title="History & Data"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></button>
+      <button id="btn-open-create" title="Create New Private Room"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg></button>
+      <button id="btn-audio" title="Toggle Audio"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg></button>
+      <button id="btn-theme" title="Toggle Theme"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg></button>
+      <button id="btn-settings" title="Settings" style="display:none;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
     </div>
   </div>
   <div id="about-display"></div>
 </div>
 
-<!-- History & Data Modal -->
+<!-- 1. History & Data Modal -->
 <div id="history-modal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
       <h2>History & Data</h2>
       <button class="btn-close" id="btn-close-history"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
     </div>
-    
     <div class="setting-group">
       <label>Save Location</label>
       <select id="storage-select">
         <option value="local">Device Storage (Local)</option>
         <option value="cloud">Cloud Storage (Sync)</option>
       </select>
-      <p id="local-warning" style="color: var(--red); font-size: 11px; margin-top: 4px;">⚠️ Warning: If you clear browser data or delete the app, device storage will be permanently lost.</p>
+      <p id="local-warning" style="color: var(--red); font-size: 11px; margin-top: 4px;">⚠️ Warning: If you clear browser data or delete the app, device storage will be lost.</p>
     </div>
-
-    <!-- Sync Key Input -->
     <div class="setting-group" id="cloud-key-group" style="display:none;">
-      <label>Your Cloud Sync Key (Enter on other devices to sync)</label>
+      <label>Your Cloud Sync Key</label>
       <div style="display:flex; gap:8px;">
         <input type="text" id="input-sync-key">
         <button class="btn-primary" id="btn-update-key" style="margin-top:0; border-radius: 12px; padding: 0 16px;">Set</button>
       </div>
     </div>
-
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
       <button id="btn-export" class="btn-secondary">Export JSON</button>
       <button id="btn-import-trigger" class="btn-secondary">Import JSON</button>
       <input type="file" id="file-import" accept=".json" style="display:none;">
     </div>
-    
     <button id="btn-save-session" class="btn-primary" style="width:100%;">Save Current Session</button>
-
     <div class="setting-group" style="margin-top: 12px;">
       <label>Past Sessions</label>
-      <div id="history-list">
-        <!-- History cards will render here -->
-      </div>
+      <div id="history-list"></div>
     </div>
   </div>
 </div>
 
-<!-- Settings Modal (FIXED: One single settings modal containing everything) -->
+<!-- 2. Settings Modal (CLEANED UP & FIXED) -->
 <div id="settings-modal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -209,7 +189,10 @@
     </div>
     <div class="setting-group" id="perm-group">
       <label>Permissions</label>
-      <select id="perm-select"><option value="host_only">Host Only (Just Me)</option><option value="anyone">Everyone (Co-Hosts)</option></select>
+      <select id="perm-select">
+        <option value="host_only">Host Only (Just Me)</option>
+        <option value="anyone">Everyone (Co-Hosts)</option>
+      </select>
     </div>
     <div class="setting-group">
       <label>Timer Mode</label>
@@ -219,20 +202,19 @@
       </select>
     </div>
     
-    <!-- Restored Countdown Settings UI -->
+    <!-- This is the Start Time Option that is now guaranteed to show up! -->
     <div class="setting-group" id="countdown-settings" style="display:none;">
-      <label>Start From</label>
+      <label>Start From (Minutes)</label>
       <div id="countdown-wrap">
         <button class="cd-btn" id="cd-minus">-</button>
         <span id="cd-display">1 min</span>
         <button class="cd-btn" id="cd-plus">+</button>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- Create Room Modal -->
+<!-- 3. Create Room Modal -->
 <div id="create-modal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -278,9 +260,8 @@
   
   let state = {}; let isHost = false; let raf = null; let timeOffset = 0; 
   let myHistory = []; 
-  let cdVal = 1; // Tracks the countdown minutes
+  let cdVal = 1; 
 
-  // DOM
   const $hh = document.getElementById('hh'); const $hColon = document.getElementById('h-colon');
   const $mm = document.getElementById('mm'); const $ss = document.getElementById('ss');
   const $ms = document.getElementById('ms'); const $glow = document.getElementById('glow');
@@ -289,7 +270,6 @@
   const $start = document.getElementById('btn-start'); const $stop = document.getElementById('btn-stop');
   const $lap = document.getElementById('btn-lap'); const $reset = document.getElementById('btn-reset');
   
-  // Modals & Settings UI
   const $settingsModal = document.getElementById('settings-modal');
   const $createModal = document.getElementById('create-modal');
   const $historyModal = document.getElementById('history-modal');
@@ -297,7 +277,7 @@
   const $cdSettings = document.getElementById('countdown-settings');
   const $cdDisplay = document.getElementById('cd-display');
 
-  // History / Sync Logic
+  // --- Storage & History Logic ---
   let storagePref = localStorage.getItem('storagePref') || 'local';
   let syncKey = localStorage.getItem('syncKey');
   if (!syncKey) { syncKey = Math.random().toString(36).substring(2, 10); localStorage.setItem('syncKey', syncKey); }
@@ -308,20 +288,15 @@
   const $inputSyncKey = document.getElementById('input-sync-key');
   const $historyList = document.getElementById('history-list');
 
-  $storageSelect.value = storagePref;
-  $inputSyncKey.value = syncKey;
+  $storageSelect.value = storagePref; $inputSyncKey.value = syncKey;
   
   function updateStorageUI() {
     storagePref = $storageSelect.value;
     localStorage.setItem('storagePref', storagePref);
     if (storagePref === 'local') {
-      $localWarning.style.display = 'block';
-      $cloudKeyGroup.style.display = 'none';
-      loadLocalHistory();
+      $localWarning.style.display = 'block'; $cloudKeyGroup.style.display = 'none'; loadLocalHistory();
     } else {
-      $localWarning.style.display = 'none';
-      $cloudKeyGroup.style.display = 'flex';
-      socket.emit('get_cloud_history', syncKey);
+      $localWarning.style.display = 'none'; $cloudKeyGroup.style.display = 'flex'; socket.emit('get_cloud_history', syncKey);
     }
   }
   $storageSelect.onchange = updateStorageUI;
@@ -332,8 +307,7 @@
   };
 
   function loadLocalHistory() {
-    try { myHistory = JSON.parse(localStorage.getItem('myHistory')) || []; } catch(e) { myHistory = []; }
-    renderHistory();
+    try { myHistory = JSON.parse(localStorage.getItem('myHistory')) || []; } catch(e) { myHistory = []; } renderHistory();
   }
   socket.on('cloud_history_data', (data) => { myHistory = data; renderHistory(); });
   
@@ -354,10 +328,7 @@
       div.className = 'history-card';
       div.innerHTML = `
         <div class="history-card-header"><span>${session.date}</span><span>${session.room}</span></div>
-        <div class="history-card-body">
-          <span class="history-card-time">${timeStr}</span>
-          ${session.laps.length > 0 ? `<span class="history-card-laps">${session.laps.length} Laps</span>` : ''}
-        </div>
+        <div class="history-card-body"><span class="history-card-time">${timeStr}</span>${session.laps.length > 0 ? `<span class="history-card-laps">${session.laps.length} Laps</span>` : ''}</div>
       `;
       $historyList.appendChild(div);
     });
@@ -366,25 +337,20 @@
   document.getElementById('btn-save-session').onclick = () => {
     const currentElapsed = state.isRunning ? state.elapsed + (Date.now() + timeOffset - state.startTime) : state.elapsed;
     if (currentElapsed <= 0) return alert("Start the timer before saving a session!");
-    
     myHistory.push({ id: Date.now(), date: new Date().toLocaleString(), room: roomName, time: currentElapsed, laps: [...state.laps] });
-    saveHistoryToDest();
-    alert("Session saved to " + (storagePref === 'local' ? "Device!" : "Cloud!"));
+    saveHistoryToDest(); alert("Session saved to " + (storagePref === 'local' ? "Device!" : "Cloud!"));
   };
 
   document.getElementById('btn-export').onclick = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(myHistory));
     const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", `stopwatch_data_${Date.now()}.json`);
-    dlAnchorElem.click();
+    dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `stopwatch_data_${Date.now()}.json`); dlAnchorElem.click();
   };
   
   const $fileImport = document.getElementById('file-import');
   document.getElementById('btn-import-trigger').onclick = () => $fileImport.click();
   $fileImport.onchange = (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
+    const file = e.target.files[0]; if(!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -393,11 +359,10 @@
         else { alert("Invalid data format."); }
       } catch(err) { alert("Error reading file."); }
     };
-    reader.readAsText(file);
-    $fileImport.value = ''; 
+    reader.readAsText(file); $fileImport.value = ''; 
   };
 
-  // Modal Triggers
+  // --- Modal Triggers ---
   document.getElementById('btn-open-history').onclick = () => { updateStorageUI(); $historyModal.classList.add('show'); };
   document.getElementById('btn-close-history').onclick = () => $historyModal.classList.remove('show');
   
@@ -407,11 +372,8 @@
   document.getElementById('btn-open-create').onclick = () => { $createModal.classList.add('show'); document.getElementById('input-room-name').focus(); };
   document.getElementById('btn-close-create').onclick = () => $createModal.classList.remove('show');
   
-  document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
-  });
+  document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); }); });
 
-  // Room Creation
   document.getElementById('btn-submit-room').onclick = () => {
     const cleanName = document.getElementById('input-room-name').value.trim().replace(/\s+/g, '-'); 
     const aboutText = document.getElementById('input-room-about').value.trim();
@@ -421,7 +383,7 @@
     window.location.href = newUrl;
   };
 
-  // Audio Logic
+  // --- Audio ---
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioCtx = new AudioContext(); let audioEnabled = true;
   document.getElementById('btn-audio').onclick = (e) => {
@@ -440,25 +402,16 @@
     if (type === 'stop') { osc.frequency.value = 440; osc.type = 'square'; }
     if (type === 'lap') { osc.frequency.value = 1200; osc.type = 'triangle'; }
     if (type === 'finish') { osc.frequency.value = 600; osc.type = 'sawtooth'; }
-    gain.gain.setValueAtTime(1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+    gain.gain.setValueAtTime(1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
     osc.start(); osc.stop(audioCtx.currentTime + 0.3);
   }
 
-  // Copy Link
   const $btnShare = document.getElementById('btn-share');
-  $btnShare.onclick = () => {
-    navigator.clipboard.writeText(window.location.href);
-    const span = $btnShare.querySelector('span');
-    span.textContent = 'COPIED!'; setTimeout(() => span.textContent = 'COPY', 2000);
-  };
+  $btnShare.onclick = () => { navigator.clipboard.writeText(window.location.href); const span = $btnShare.querySelector('span'); span.textContent = 'COPIED!'; setTimeout(() => span.textContent = 'COPY', 2000); };
 
-  // Sync Logic
+  // --- Sync & Timer Math ---
   function syncLatency() { socket.emit('sync_ping', Date.now()); }
-  socket.on('sync_pong', (data) => {
-    const rtt = Date.now() - data.clientTime;
-    timeOffset = (data.serverTime + (rtt / 2)) - Date.now();
-  });
+  socket.on('sync_pong', (data) => { timeOffset = (data.serverTime + ((Date.now() - data.clientTime) / 2)) - Date.now(); });
   setInterval(syncLatency, 5000);
 
   function formatTime(ms) {
@@ -472,25 +425,19 @@
 
   function display(ms) {
     const t = formatTime(ms);
-    if (t.h === '00') { $hh.style.display = 'none'; $hColon.style.display = 'none'; } 
-    else { $hh.style.display = 'inline'; $hColon.style.display = 'inline'; }
-    $hh.textContent = t.h; $mm.textContent = t.m;
-    $ss.textContent = t.s; $ms.textContent = t.msec;
+    if (t.h === '00') { $hh.style.display = 'none'; $hColon.style.display = 'none'; } else { $hh.style.display = 'inline'; $hColon.style.display = 'inline'; }
+    $hh.textContent = t.h; $mm.textContent = t.m; $ss.textContent = t.s; $ms.textContent = t.msec;
   }
 
   function renderLaps(lapsArr) {
-    $laps.innerHTML = '';
-    if (lapsArr.length === 0) return;
+    $laps.innerHTML = ''; if (lapsArr.length === 0) return;
     const splits = lapsArr.map((lap, i) => i === 0 ? lap : lap - lapsArr[i-1]);
     let minSplit = Infinity, maxSplit = -Infinity;
     if (lapsArr.length > 1) { minSplit = Math.min(...splits); maxSplit = Math.max(...splits); }
     lapsArr.forEach((lapMs, i) => {
       const splitMs = splits[i]; const tTot = formatTime(lapMs); const tSplt = formatTime(splitMs);
       const li = document.createElement('li');
-      if (lapsArr.length > 1) {
-        if (splitMs === minSplit) li.className = 'fastest';
-        if (splitMs === maxSplit) li.className = 'slowest';
-      }
+      if (lapsArr.length > 1) { if (splitMs === minSplit) li.className = 'fastest'; if (splitMs === maxSplit) li.className = 'slowest'; }
       li.innerHTML = `<span class="lap-num">Lap ${i + 1}</span><span class="lap-split">+${tSplt.m}:${tSplt.s}.${tSplt.msec}</span><span class="lap-tot">${tTot.h !== '00' ? tTot.h+':' : ''}${tTot.m}:${tTot.s}.${tTot.msec}</span>`;
       $laps.appendChild(li);
     });
@@ -498,8 +445,7 @@
 
   function tick() {
     if (state.isRunning) {
-      const now = Date.now() + timeOffset;
-      let currentElapsed = state.elapsed + (now - state.startTime);
+      const currentElapsed = state.elapsed + (Date.now() + timeOffset - state.startTime);
       if (state.mode === 'countdown') {
         let remaining = state.countdownDuration - currentElapsed;
         if (remaining <= 0) { remaining = 0; if (isHost) socket.emit('stop'); playTone('finish'); }
@@ -517,8 +463,7 @@
     document.getElementById('role-display').textContent = isHost ? 'Host' : (canControl ? 'Co-Host' : 'Viewer');
     document.getElementById('role-display').className = isHost ? 'role-host' : (canControl ? 'role-host' : 'role-viewer');
     
-    if (state.about) { $aboutDisplay.textContent = state.about; $aboutDisplay.style.display = 'block'; } 
-    else { $aboutDisplay.style.display = 'none'; }
+    if (state.about) { $aboutDisplay.textContent = state.about; $aboutDisplay.style.display = 'block'; } else { $aboutDisplay.style.display = 'none'; }
 
     $btnSettings.style.display = canControl ? 'flex' : 'none';
     document.getElementById('perm-group').style.display = isHost ? 'flex' : 'none';
@@ -526,34 +471,23 @@
 
     if (canControl) {
       $start.disabled = state.isRunning || (state.mode === 'countdown' && state.elapsed >= state.countdownDuration);
-      $stop.disabled = !state.isRunning;
-      $lap.disabled = !state.isRunning || state.mode === 'countdown';
-      $reset.disabled = state.isRunning && state.elapsed === 0;
-    } else {
-      $start.disabled = $stop.disabled = $lap.disabled = $reset.disabled = true;
-    }
+      $stop.disabled = !state.isRunning; $lap.disabled = !state.isRunning || state.mode === 'countdown'; $reset.disabled = state.isRunning && state.elapsed === 0;
+    } else { $start.disabled = $stop.disabled = $lap.disabled = $reset.disabled = true; }
     
     $stop.classList.toggle('active', state.isRunning);
     $glow.style.background = state.isRunning ? 'var(--green)' : state.elapsed > 0 ? 'var(--red)' : 'transparent';
     
+    // --- THIS FIXED THE START TIME ISSUE ---
     $modeSelect.value = state.mode;
-    
-    // UI Update for Countdown Settings
     cdVal = state.countdownDuration / 60000;
     $cdDisplay.textContent = cdVal + ' min';
     $cdSettings.style.display = state.mode === 'countdown' ? 'flex' : 'none';
 
     renderLaps(state.laps);
     if (raf) cancelAnimationFrame(raf);
-    
     if (state.isRunning) { raf = requestAnimationFrame(tick); } 
-    else {
-      if (state.mode === 'countdown') { display(Math.max(0, state.countdownDuration - state.elapsed)); } 
-      else { display(state.elapsed); }
-    }
+    else { if (state.mode === 'countdown') { display(Math.max(0, state.countdownDuration - state.elapsed)); } else { display(state.elapsed); } }
   });
-
-  socket.on('audio_cue', type => playTone(type));
 
   const unlockAudio = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); };
   $start.onclick = () => { unlockAudio(); socket.emit('start'); };
@@ -563,22 +497,19 @@
   
   document.getElementById('perm-select').onchange = (e) => socket.emit('set_permission', e.target.value);
   
-  // COUNTDOWN EVENT LISTENERS
-  $modeSelect.onchange = (e) => socket.emit('set_mode', { mode: e.target.value, duration: cdVal * 60000 });
-  
-  document.getElementById('cd-minus').onclick = () => {
-    if(cdVal > 1) { cdVal--; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); }
-  };
-  document.getElementById('cd-plus').onclick = () => {
-    if(cdVal < 60) { cdVal++; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); }
+  // IMMEDIATELY SHOW SETTINGS WHEN DROPDOWN CHANGES
+  $modeSelect.onchange = (e) => {
+    const newMode = e.target.value;
+    $cdSettings.style.display = newMode === 'countdown' ? 'flex' : 'none';
+    socket.emit('set_mode', { mode: newMode, duration: cdVal * 60000 });
   };
   
-  document.getElementById('btn-theme').onclick = () => {
-    const root = document.documentElement;
-    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  };
+  document.getElementById('cd-minus').onclick = () => { if(cdVal > 1) { cdVal--; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); } };
+  document.getElementById('cd-plus').onclick = () => { if(cdVal < 60) { cdVal++; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); } };
   
-  updateStorageUI(); // Init Storage UI
+  document.getElementById('btn-theme').onclick = () => { const root = document.documentElement; root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); };
+  
+  updateStorageUI(); 
 </script>
 </body>
 </html>
