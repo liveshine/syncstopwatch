@@ -8,34 +8,22 @@
   <style>
     /* --- THEME VARIABLES --- */
     :root[data-theme="dark"] {
-      --bg: #050505; 
-      --surface: #111111;
-      --surface-hover: #1a1a1a;
-      --text: #ffffff; 
-      --text-muted: #737373;
-      --border: #262626;
+      --bg: #050505; --surface: #111111; --surface-hover: #1a1a1a;
+      --text: #ffffff; --text-muted: #737373; --border: #262626;
       --green: #34d399; --green-bg: rgba(52, 211, 153, 0.1); --green-border: rgba(52, 211, 153, 0.3);
       --red: #f87171; --red-bg: rgba(248, 113, 113, 0.1); --red-border: rgba(248, 113, 113, 0.3);
       --blue: #60a5fa; --blue-bg: rgba(96, 165, 250, 0.1); --blue-border: rgba(96, 165, 250, 0.3);
     }
-    
     :root[data-theme="light"] {
-      --bg: #fafafa; 
-      --surface: #ffffff;
-      --surface-hover: #f0f0f0;
-      --text: #0a0a0a; 
-      --text-muted: #737373;
-      --border: #e5e5e5;
+      --bg: #fafafa; --surface: #ffffff; --surface-hover: #f0f0f0;
+      --text: #0a0a0a; --text-muted: #737373; --border: #e5e5e5;
       --green: #10b981; --green-bg: rgba(16, 185, 129, 0.1); --green-border: rgba(16, 185, 129, 0.4);
       --red: #ef4444; --red-bg: rgba(239, 68, 68, 0.1); --red-border: rgba(239, 68, 68, 0.4);
       --blue: #3b82f6; --blue-bg: rgba(59, 130, 246, 0.1); --blue-border: rgba(59, 130, 246, 0.4);
     }
-
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    
     body {
-      min-height: 100dvh;
-      background: var(--bg); color: var(--text);
+      min-height: 100dvh; background: var(--bg); color: var(--text);
       font-family: ui-monospace, 'Cascadia Code', 'SF Mono', 'Roboto Mono', Menlo, monospace;
       display: flex; flex-direction: column; align-items: center;
       position: relative; overflow-y: auto; overflow-x: hidden;
@@ -43,49 +31,25 @@
     }
 
     /* --- TOP HEADER --- */
-    #top-bar {
-      width: 100%; max-width: 1000px; padding: 24px;
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 8px;
-      z-index: 10;
-    }
-    
-    .room-badge {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 8px 12px 8px 16px; border-radius: 100px; 
-      font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    
+    #top-bar-container { width: 100%; max-width: 1000px; padding: 24px; z-index: 10; display: flex; flex-direction: column; gap: 12px; }
+    #top-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .room-badge { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); padding: 8px 12px 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
     .role-host { color: var(--green); }
     .role-viewer { color: var(--text-muted); }
     .sep { color: var(--border); margin: 0 2px; }
     
-    #btn-share {
-      background: var(--bg); border: 1px solid var(--border); color: var(--text); 
-      padding: 4px 10px; border-radius: 100px; cursor: pointer; 
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
-    }
+    #about-display { font-size: 12px; color: var(--text-muted); padding: 0 16px; display: none; }
+
+    #btn-share { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; border-radius: 100px; cursor: pointer; font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
     #btn-share:hover { background: var(--surface-hover); border-color: var(--text-muted); }
 
-    .toggles {
-      display: flex; flex-direction: row; gap: 8px; align-items: center;
-    }
-    
-    .toggles button {
-      background: var(--surface); border: 1px solid var(--border); color: var(--text);
-      width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 16px; cursor: pointer; transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
+    .toggles { display: flex; flex-direction: row; gap: 8px; align-items: center; }
+    .toggles button { background: var(--surface); border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .toggles button:hover { background: var(--surface-hover); transform: translateY(-2px); }
 
-    /* MOBILE RESPONSIVE FIX */
     @media (max-width: 480px) {
-      #top-bar { padding: 16px 12px; }
+      #top-bar-container { padding: 16px 12px; }
       .room-badge { padding: 6px 10px; font-size: 11px; gap: 6px; }
       #btn-share { padding: 4px 6px; font-size: 10px; }
       .toggles button { width: 34px; height: 34px; font-size: 14px; }
@@ -93,158 +57,101 @@
     }
 
     /* --- TIMER DISPLAY --- */
-    .timer-container {
-      flex-grow: 1; display: flex; flex-direction: column; 
-      justify-content: center; align-items: center; width: 100%;
-      padding: 40px 20px; z-index: 10;
-    }
-
-    #timer {
-      font-size: clamp(4rem, 15vw, 10rem); font-weight: 700; line-height: 1;
-      display: flex; align-items: baseline; justify-content: center;
-      font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    
+    .timer-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; padding: 20px; z-index: 10; }
+    #timer { font-size: clamp(4rem, 15vw, 10rem); font-weight: 700; line-height: 1; display: flex; align-items: baseline; justify-content: center; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; text-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     #timer .colon { color: var(--text-muted); margin: 0 4px; animation: pulse 2s infinite; }
     .frac { font-size: clamp(1.5rem, 5vw, 3.5rem); color: var(--text-muted); margin-left: 8px; font-weight: 500; }
 
-    /* --- CONTROLS SECTION --- */
-    #controls {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;
-      width: 100%; max-width: 640px; padding: 0 24px; z-index: 10; margin-bottom: 40px;
-    }
-    
-    .ctrl-btn {
-      flex: 1 1 calc(50% - 16px); 
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-      padding: 24px 0; border-radius: 24px; border: 1.5px solid var(--border);
-      font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
-      cursor: pointer; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-      background: var(--surface); color: var(--text-muted);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    }
-    
-    @media (min-width: 768px) {
-      .ctrl-btn { flex: 1 1 0; padding: 32px 0; } 
-    }
-
+    /* --- CONTROLS --- */
+    #controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; width: 100%; max-width: 640px; padding: 0 24px; z-index: 10; margin-bottom: 40px; }
+    .ctrl-btn { flex: 1 1 calc(50% - 16px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 0; border-radius: 24px; border: 1.5px solid var(--border); font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: var(--surface); color: var(--text-muted); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    @media (min-width: 768px) { .ctrl-btn { flex: 1 1 0; padding: 32px 0; } }
     .ctrl-btn svg { width: 28px; height: 28px; transition: transform 0.2s; }
     .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none; }
     .ctrl-btn:not(:disabled):active { transform: scale(0.95); }
-
-    /* Specific Button Styles */
     #btn-start { border-color: var(--green-border); color: var(--green); background: var(--green-bg); }
     #btn-start:not(:disabled):hover { background: var(--green); color: var(--bg); transform: translateY(-4px); box-shadow: 0 10px 25px var(--green-bg); }
-    
     #btn-stop.active { border-color: var(--red-border); color: var(--red); background: var(--red-bg); }
     #btn-stop.active:hover { background: var(--red); color: var(--bg); transform: translateY(-4px); box-shadow: 0 10px 25px var(--red-bg); }
-
     #btn-lap { border-color: var(--blue-border); color: var(--blue); }
     #btn-lap:not(:disabled):hover { background: var(--blue); color: var(--bg); transform: translateY(-4px); box-shadow: 0 10px 25px var(--blue-bg); }
-
     #btn-reset:not(:disabled):hover { background: var(--text); color: var(--bg); transform: translateY(-4px); }
 
-    /* --- LAPS LIST --- */
-    #laps {
-      width: 100%; max-width: 640px; padding: 0 24px 60px; list-style: none;
-      display: flex; flex-direction: column-reverse; z-index: 10;
-    }
-    #laps li {
-      display: flex; justify-content: space-between; align-items: center; padding: 16px 0;
-      border-bottom: 1px solid var(--border); font-size: 15px; font-variant-numeric: tabular-nums;
-    }
+    /* --- LAPS --- */
+    #laps { width: 100%; max-width: 640px; padding: 0 24px 60px; list-style: none; display: flex; flex-direction: column-reverse; z-index: 10; }
+    #laps li { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-variant-numeric: tabular-nums; }
     #laps li .lap-num { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; }
     #laps li .lap-split { color: var(--text-muted); font-weight: 500; }
     #laps li .lap-tot { font-weight: 700; font-size: 17px; }
-    
     #laps li.fastest .lap-split, #laps li.fastest .lap-tot { color: var(--green); }
     #laps li.slowest .lap-split, #laps li.slowest .lap-tot { color: var(--red); }
 
-    /* --- MODAL --- */
-    #settings-modal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-      z-index: 100; display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: all 0.3s ease;
-    }
-    #settings-modal.show { opacity: 1; pointer-events: all; }
-    
-    .modal-content {
-      background: var(--surface); border: 1px solid var(--border);
-      width: min(90%, 400px); padding: 32px; border-radius: 24px;
-      display: flex; flex-direction: column; gap: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-      transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    #settings-modal.show .modal-content { transform: translateY(0) scale(1); }
-    
+    /* --- MODALS --- */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: all 0.3s ease; }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal-content { background: var(--surface); border: 1px solid var(--border); width: min(90%, 400px); padding: 32px; border-radius: 24px; display: flex; flex-direction: column; gap: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .modal-overlay.show .modal-content { transform: translateY(0) scale(1); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; }
     .modal-header h2 { font-size: 20px; font-weight: 700; }
     .btn-close { background: var(--bg); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .btn-close:hover { background: var(--text); color: var(--bg); }
-    
     .setting-group { display: flex; flex-direction: column; gap: 10px; }
     .setting-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-    .setting-group select {
-      background: var(--bg); color: var(--text); border: 1px solid var(--border);
-      padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; width: 100%; outline: none; cursor: pointer;
-    }
-    .setting-group select:focus { border-color: var(--blue); }
-
+    .setting-group select, .setting-group input { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; width: 100%; outline: none; cursor: pointer; }
+    .setting-group select:focus, .setting-group input:focus { border-color: var(--blue); }
     #countdown-wrap { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 6px; }
     .cd-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 18px; width: 44px; height: 44px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
     .cd-btn:hover { background: var(--text); color: var(--bg); }
     #cd-display { font-size: 16px; font-weight: 700; }
+    
+    .btn-primary { background: var(--green); color: var(--bg); border: none; padding: 16px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+    .btn-primary:hover { background: #10b981; transform: translateY(-2px); }
 
-    /* --- AMBIENT GLOW --- */
-    #glow {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px);
-      opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0;
-    }
+    #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
   </style>
 </head>
 <body>
 
-<div id="top-bar">
-  <div class="room-badge">
-    <div class="dot"></div>
-    <span id="room-display">Main</span>
-    <span class="sep">/</span>
-    <span id="role-display" class="role-viewer">Viewer</span>
-    
-    <button id="btn-share" title="Copy Room Link">
-      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-      <span>Copy</span>
-    </button>
-  </div>
-  
-  <div class="toggles">
-    <!-- NEW: Create Private Room Button -->
-    <button id="btn-new-room" title="Create New Private Room">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-    </button>
-    <button id="btn-audio" title="Toggle Audio">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>
-    </button>
-    <button id="btn-theme" title="Toggle Theme">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-    </button>
-    <button id="btn-settings" title="Settings" style="display:none;">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-    </button>
-  </div>
-</div>
-
-<div id="settings-modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Room Settings</h2>
-      <button class="btn-close" id="btn-close-modal">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+<div id="top-bar-container">
+  <div id="top-bar">
+    <div class="room-badge">
+      <div class="dot"></div>
+      <span id="room-display">Main</span>
+      <span class="sep">/</span>
+      <span id="role-display" class="role-viewer">Viewer</span>
+      
+      <button id="btn-share" title="Copy Room Link">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        <span>Copy</span>
       </button>
     </div>
     
+    <div class="toggles">
+      <!-- Create Room Button -->
+      <button id="btn-open-create" title="Create New Private Room">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+      </button>
+      <button id="btn-audio" title="Toggle Audio">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>
+      </button>
+      <button id="btn-theme" title="Toggle Theme">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      </button>
+      <button id="btn-settings" title="Settings" style="display:none;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      </button>
+    </div>
+  </div>
+  <div id="about-display"></div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Room Settings</h2>
+      <button class="btn-close" id="btn-close-settings"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+    </div>
     <div class="setting-group" id="perm-group">
       <label>Permissions</label>
       <select id="perm-select">
@@ -252,7 +159,6 @@
         <option value="anyone">Everyone (Co-Hosts)</option>
       </select>
     </div>
-
     <div class="setting-group">
       <label>Timer Mode</label>
       <select id="mode-select">
@@ -260,7 +166,6 @@
         <option value="countdown">Countdown (Count Down)</option>
       </select>
     </div>
-
     <div class="setting-group" id="countdown-settings" style="display:none;">
       <label>Start From</label>
       <div id="countdown-wrap">
@@ -269,6 +174,25 @@
         <button class="cd-btn" id="cd-plus">+</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- NEW: Create Room Modal -->
+<div id="create-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Create Private Room</h2>
+      <button class="btn-close" id="btn-close-create"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+    </div>
+    <div class="setting-group">
+      <label>Room Name (Required)</label>
+      <input type="text" id="input-room-name" placeholder="e.g. Morning Workout" required autocomplete="off">
+    </div>
+    <div class="setting-group">
+      <label>About Room (Optional)</label>
+      <input type="text" id="input-room-about" placeholder="e.g. 5K Sprint Training" autocomplete="off">
+    </div>
+    <button id="btn-submit-room" class="btn-primary">Create & Join</button>
   </div>
 </div>
 
@@ -282,22 +206,10 @@
 </div>
 
 <div id="controls">
-  <button class="ctrl-btn" id="btn-start" disabled>
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    START
-  </button>
-  <button class="ctrl-btn" id="btn-stop" disabled>
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
-    STOP
-  </button>
-  <button class="ctrl-btn" id="btn-lap" disabled>
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v19"/></svg>
-    LAP
-  </button>
-  <button class="ctrl-btn" id="btn-reset" disabled>
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-    RESET
-  </button>
+  <button class="ctrl-btn" id="btn-start" disabled><svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>START</button>
+  <button class="ctrl-btn" id="btn-stop" disabled><svg fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>STOP</button>
+  <button class="ctrl-btn" id="btn-lap" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v19"/></svg>LAP</button>
+  <button class="ctrl-btn" id="btn-reset" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>RESET</button>
 </div>
 
 <ul id="laps"></ul>
@@ -309,9 +221,14 @@
 
   const urlParams = new URLSearchParams(window.location.search);
   const roomName = urlParams.get('room') || 'main';
-  document.getElementById('room-display').textContent = roomName;
+  const aboutQuery = urlParams.get('about') || '';
+  
+  // Clean up display name (replace hyphens with spaces for visual)
+  document.getElementById('room-display').textContent = roomName.replace(/-/g, ' ');
 
-  const socket = io({ query: { room: roomName } });
+  // Pass 'about' back to server if it exists in URL
+  const socket = io({ query: { room: roomName, about: aboutQuery } });
+  
   let state = {};
   let isHost = false;
   let raf = null;
@@ -324,33 +241,64 @@
   const $ms = document.getElementById('ms');
   const $glow = document.getElementById('glow');
   const $laps = document.getElementById('laps');
+  const $aboutDisplay = document.getElementById('about-display');
   
   const $start = document.getElementById('btn-start');
   const $stop = document.getElementById('btn-stop');
   const $lap = document.getElementById('btn-lap');
   const $reset = document.getElementById('btn-reset');
   
-  const $modal = document.getElementById('settings-modal');
+  const $settingsModal = document.getElementById('settings-modal');
   const $btnSettings = document.getElementById('btn-settings');
-  const $btnCloseModal = document.getElementById('btn-close-modal');
+  const $btnCloseSettings = document.getElementById('btn-close-settings');
   const $permSelect = document.getElementById('perm-select');
   const $modeSelect = document.getElementById('mode-select');
   const $cdSettings = document.getElementById('countdown-settings');
   const $cdDisplay = document.getElementById('cd-display');
   
+  const $createModal = document.getElementById('create-modal');
+  const $btnOpenCreate = document.getElementById('btn-open-create');
+  const $btnCloseCreate = document.getElementById('btn-close-create');
+  const $btnSubmitRoom = document.getElementById('btn-submit-room');
+  const $inputRoomName = document.getElementById('input-room-name');
+  const $inputRoomAbout = document.getElementById('input-room-about');
+  
   let cdVal = 1; 
+
+  // Modal Listeners
+  $btnSettings.onclick = () => $settingsModal.classList.add('show');
+  $btnCloseSettings.onclick = () => $settingsModal.classList.remove('show');
+  
+  $btnOpenCreate.onclick = () => { $createModal.classList.add('show'); $inputRoomName.focus(); };
+  $btnCloseCreate.onclick = () => $createModal.classList.remove('show');
+  
+  // Close modals when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
+  });
+
+  // NEW: Submit Room Creation
+  $btnSubmitRoom.onclick = () => {
+    // Replaces all spaces with hyphens so URLs are clean (e.g. ?room=My-Cool-Room)
+    const rawName = $inputRoomName.value.trim();
+    const cleanName = rawName.replace(/\s+/g, '-'); 
+    const aboutText = $inputRoomAbout.value.trim();
+    
+    if (!cleanName) return alert("Please enter a Room Name.");
+    
+    let newUrl = `?room=${encodeURIComponent(cleanName)}`;
+    if (aboutText) newUrl += `&about=${encodeURIComponent(aboutText)}`;
+    
+    window.location.href = newUrl;
+  };
+
+  // Allow pressing Enter key to submit room
+  $inputRoomName.addEventListener("keypress", (e) => { if (e.key === "Enter") $btnSubmitRoom.click(); });
+  $inputRoomAbout.addEventListener("keypress", (e) => { if (e.key === "Enter") $btnSubmitRoom.click(); });
 
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioCtx = new AudioContext();
   let audioEnabled = true;
-
-  // NEW: Create Private Room Logic
-  document.getElementById('btn-new-room').onclick = () => {
-    // Generates a random 6-character alphanumeric string
-    const newRoomId = Math.random().toString(36).substring(2, 8);
-    // Reload the page with the new unique room ID
-    window.location.href = `?room=${newRoomId}`;
-  };
 
   document.getElementById('btn-audio').onclick = (e) => {
     audioEnabled = !audioEnabled;
@@ -369,15 +317,12 @@
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
-    
     if (type === 'start') { osc.frequency.value = 880; osc.type = 'sine'; }
     if (type === 'stop') { osc.frequency.value = 440; osc.type = 'square'; }
     if (type === 'lap') { osc.frequency.value = 1200; osc.type = 'triangle'; }
     if (type === 'finish') { osc.frequency.value = 600; osc.type = 'sawtooth'; }
-    
     gain.gain.setValueAtTime(1, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
-    
     osc.start(); osc.stop(audioCtx.currentTime + 0.3);
   }
 
@@ -392,8 +337,7 @@
   function syncLatency() { socket.emit('sync_ping', Date.now()); }
   socket.on('sync_pong', (data) => {
     const rtt = Date.now() - data.clientTime;
-    const serverTimeNow = data.serverTime + (rtt / 2);
-    timeOffset = serverTimeNow - Date.now();
+    timeOffset = (data.serverTime + (rtt / 2)) - Date.now();
   });
   setInterval(syncLatency, 5000);
 
@@ -420,26 +364,20 @@
   function renderLaps(lapsArr) {
     $laps.innerHTML = '';
     if (lapsArr.length === 0) return;
-
     const splits = lapsArr.map((lap, i) => i === 0 ? lap : lap - lapsArr[i-1]);
     let minSplit = Infinity, maxSplit = -Infinity;
-    
     if (lapsArr.length > 1) {
-      minSplit = Math.min(...splits);
-      maxSplit = Math.max(...splits);
+      minSplit = Math.min(...splits); maxSplit = Math.max(...splits);
     }
-
     lapsArr.forEach((lapMs, i) => {
       const splitMs = splits[i];
       const tTot = formatTime(lapMs);
       const tSplt = formatTime(splitMs);
-      
       const li = document.createElement('li');
       if (lapsArr.length > 1) {
         if (splitMs === minSplit) li.className = 'fastest';
         if (splitMs === maxSplit) li.className = 'slowest';
       }
-
       li.innerHTML = `
         <span class="lap-num">Lap ${i + 1}</span>
         <span class="lap-split">+${tSplt.m}:${tSplt.s}.${tSplt.msec}</span>
@@ -453,7 +391,6 @@
     if (state.isRunning) {
       const now = Date.now() + timeOffset;
       let currentElapsed = state.elapsed + (now - state.startTime);
-      
       if (state.mode === 'countdown') {
         let remaining = state.countdownDuration - currentElapsed;
         if (remaining <= 0) {
@@ -477,6 +414,14 @@
     document.getElementById('role-display').textContent = isHost ? 'Host' : (canControl ? 'Co-Host' : 'Viewer');
     document.getElementById('role-display').className = isHost ? 'role-host' : (canControl ? 'role-host' : 'role-viewer');
     
+    // NEW: Display the "About" text if it exists
+    if (state.about) {
+        $aboutDisplay.textContent = state.about;
+        $aboutDisplay.style.display = 'block';
+    } else {
+        $aboutDisplay.style.display = 'none';
+    }
+
     $btnSettings.style.display = canControl ? 'flex' : 'none';
     document.getElementById('perm-group').style.display = isHost ? 'flex' : 'none';
     $permSelect.value = state.permission;
@@ -499,9 +444,7 @@
     $cdSettings.style.display = state.mode === 'countdown' ? 'flex' : 'none';
 
     renderLaps(state.laps);
-
     if (raf) cancelAnimationFrame(raf);
-    
     if (state.isRunning) {
       raf = requestAnimationFrame(tick);
     } else {
@@ -515,12 +458,7 @@
 
   socket.on('audio_cue', type => playTone(type));
 
-  $btnSettings.onclick = () => $modal.classList.add('show');
-  $btnCloseModal.onclick = () => $modal.classList.remove('show');
-  $modal.onclick = (e) => { if(e.target === $modal) $modal.classList.remove('show'); };
-
   const unlockAudio = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); };
-  
   $start.onclick = () => { unlockAudio(); socket.emit('start'); };
   $stop.onclick  = () => { unlockAudio(); socket.emit('stop'); };
   $lap.onclick   = () => { unlockAudio(); socket.emit('lap'); };
