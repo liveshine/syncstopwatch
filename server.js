@@ -2,11 +2,9 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -14,58 +12,45 @@ const io = new Server(server, {
   }
 });
 
-const publicPath = path.join(__dirname, 'public');
-app.use(express.static(publicPath));
-
-app.use((req, res) => {
-  const indexPath = path.join(publicPath, 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send(`<h2>Error: Missing File</h2><p>Folder must be named "public".</p>`);
-  }
-});
+// Serve static files directly from the "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 let startTime = null;
 let isRunning = false;
 
-io.on('connection', socket => {
-  // CLOCK DRIFT FIX: Send how long the timer has been running, not the raw timestamp
-  const elapsedSoFar = isRunning ? (Date.now() - startTime) : 0;
-  socket.emit('timer_state', { isRunning, elapsedSoFar });
+io.on('connection', (socket) => {
+  // Sync state for newly connected phones
+  socket.emit('timer_state', { isRunning, startTime });
+  
+  // Broadcast connected count to everyone
   io.emit('connected_count', io.engine.clientsCount);
 
-  socket.on('request_state', () => {
-    const elapsedSoFar = isRunning ? (Date.now() - startTime) : 0;
-    socket.emit('timer_state', { isRunning, elapsedSoFar });
-  });
-
+  // START
   socket.on('start_timer', () => {
     if (!isRunning) {
       startTime = Date.now();
       isRunning = true;
-      io.emit('timer_started'); // Just sends "GO!", no timestamp needed
+      io.emit('timer_started', startTime);
     }
   });
 
+  // STOP
   socket.on('stop_timer', () => {
     if (isRunning) {
-      const dur = Date.now() - startTime; // Server calculates the exact official time
+      const dur = Date.now() - startTime;
       isRunning = false;
       io.emit('timer_stopped', dur);
     }
   });
 
+  // RESET
   socket.on('reset_timer', () => {
     startTime = null;
     isRunning = false;
     io.emit('timer_reset');
   });
 
-  socket.on('ping_check', (timestamp, callback) => {
-    callback(); 
-  });
-
+  // DISCONNECT
   socket.on('disconnect', () => {
     io.emit('connected_count', io.engine.clientsCount);
   });
