@@ -64,7 +64,7 @@
 
     /* --- CONTROLS --- */
     #controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; width: 100%; max-width: 640px; padding: 0 24px; z-index: 10; margin-bottom: 40px; }
-    .ctrl-btn { flex: 1 1 calc(50% - 16px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 0; border-radius: 24px; border: 1.5px solid var(--border); font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: var(--surface); color: var(--text-muted); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    .ctrl-btn { flex: 1 1 calc(33% - 16px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 0; border-radius: 24px; border: 1.5px solid var(--border); font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: var(--surface); color: var(--text-muted); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
     @media (min-width: 768px) { .ctrl-btn { flex: 1 1 0; padding: 32px 0; } }
     .ctrl-btn svg { width: 28px; height: 28px; transition: transform 0.2s; }
     .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none; }
@@ -108,6 +108,14 @@
     .btn-primary:hover { background: #10b981; transform: translateY(-2px); }
 
     #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
+
+    /* --- HISTORY SPECIFIC STYLES --- */
+    #btn-save-run { border-color: var(--text-muted); color: var(--text); }
+    #btn-save-run:not(:disabled):hover { background: var(--text); color: var(--bg); transform: translateY(-4px); }
+    .history-item { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .history-item-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .history-item-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+    .history-item-laps { font-size: 13px; color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -139,6 +147,9 @@
       </button>
       <button id="btn-settings" title="Settings" style="display:none;">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      </button>
+      <button id="btn-history" title="View History">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       </button>
     </div>
   </div>
@@ -177,7 +188,7 @@
   </div>
 </div>
 
-<!-- NEW: Create Room Modal -->
+<!-- Create Room Modal -->
 <div id="create-modal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -196,6 +207,56 @@
   </div>
 </div>
 
+<!-- History Modal -->
+<div id="history-modal" class="modal-overlay">
+  <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+    <div class="modal-header">
+      <h2>Timer History</h2>
+      <button class="btn-close" id="btn-close-history">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <!-- Storage Preferences -->
+    <div class="setting-group">
+      <label>Save Destination</label>
+      <select id="storage-select">
+        <option value="local">Local Device (Browser)</option>
+        <option value="cloud">Cloud Storage</option>
+      </select>
+    </div>
+    
+    <!-- Dynamic Warnings & Cloud ID -->
+    <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
+      ⚠️ <strong>Warning:</strong> Local data is saved only on this browser. If you clear your browser data or delete the app, your history will be permanently lost.
+    </p>
+    <div class="setting-group" id="cloud-id-group" style="display: none;">
+      <label>Your Cloud Sync ID (Save this to sync across devices)</label>
+      <input type="text" id="cloud-sync-id" autocomplete="off">
+      <button id="btn-fetch-cloud" class="btn-primary" style="padding: 10px;">Fetch Cloud Data</button>
+    </div>
+
+    <!-- Import / Export Controls -->
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button id="btn-export" class="btn-primary" style="flex: 1; padding: 10px; background: var(--blue);">Export JSON</button>
+      <button id="btn-import-trigger" class="btn-primary" style="flex: 1; padding: 10px; background: var(--text-muted);">Import JSON</button>
+      <input type="file" id="file-import" accept=".json" style="display: none;">
+    </div>
+
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
+
+    <!-- History List -->
+    <div class="setting-group">
+      <label>Saved Runs</label>
+      <ul id="history-list" style="list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding: 0;">
+        <!-- History items injected via JS -->
+      </ul>
+    </div>
+    
+    <button id="btn-clear-history" class="btn-primary" style="background: var(--red); padding: 10px;">Clear All History</button>
+  </div>
+</div>
+
 <div class="timer-container">
   <div id="timer">
     <span id="hh">00</span><span class="colon" id="h-colon">:</span>
@@ -210,6 +271,8 @@
   <button class="ctrl-btn" id="btn-stop" disabled><svg fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>STOP</button>
   <button class="ctrl-btn" id="btn-lap" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v19"/></svg>LAP</button>
   <button class="ctrl-btn" id="btn-reset" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>RESET</button>
+  <!-- NEW SAVE BUTTON -->
+  <button class="ctrl-btn" id="btn-save-run" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>SAVE</button>
 </div>
 
 <ul id="laps"></ul>
@@ -247,6 +310,7 @@
   const $stop = document.getElementById('btn-stop');
   const $lap = document.getElementById('btn-lap');
   const $reset = document.getElementById('btn-reset');
+  const $btnSaveRun = document.getElementById('btn-save-run');
   
   const $settingsModal = document.getElementById('settings-modal');
   const $btnSettings = document.getElementById('btn-settings');
@@ -277,7 +341,6 @@
     modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
   });
 
-  // NEW: Submit Room Creation
   $btnSubmitRoom.onclick = () => {
     // Replaces all spaces with hyphens so URLs are clean (e.g. ?room=My-Cool-Room)
     const rawName = $inputRoomName.value.trim();
@@ -414,7 +477,6 @@
     document.getElementById('role-display').textContent = isHost ? 'Host' : (canControl ? 'Co-Host' : 'Viewer');
     document.getElementById('role-display').className = isHost ? 'role-host' : (canControl ? 'role-host' : 'role-viewer');
     
-    // NEW: Display the "About" text if it exists
     if (state.about) {
         $aboutDisplay.textContent = state.about;
         $aboutDisplay.style.display = 'block';
@@ -435,6 +497,7 @@
       $start.disabled = $stop.disabled = $lap.disabled = $reset.disabled = true;
     }
     
+    $btnSaveRun.disabled = state.isRunning || state.elapsed === 0;
     $stop.classList.toggle('active', state.isRunning);
     $glow.style.background = state.isRunning ? 'var(--green)' : state.elapsed > 0 ? 'var(--red)' : 'transparent';
     
@@ -477,6 +540,165 @@
   document.getElementById('btn-theme').onclick = () => {
     const root = document.documentElement;
     root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  };
+
+  // --- HISTORY LOGIC ---
+  let historyData = [];
+  let storageMode = localStorage.getItem('storageMode') || 'local';
+  let cloudSyncKey = localStorage.getItem('cloudSyncKey') || Math.random().toString(36).substr(2, 9).toUpperCase();
+  
+  localStorage.setItem('cloudSyncKey', cloudSyncKey);
+  
+  const $historyModal = document.getElementById('history-modal');
+  const $btnHistory = document.getElementById('btn-history');
+  const $btnCloseHistory = document.getElementById('btn-close-history');
+  const $storageSelect = document.getElementById('storage-select');
+  const $localWarning = document.getElementById('local-warning');
+  const $cloudIdGroup = document.getElementById('cloud-id-group');
+  const $cloudSyncId = document.getElementById('cloud-sync-id');
+  const $historyList = document.getElementById('history-list');
+  const $btnFetchCloud = document.getElementById('btn-fetch-cloud');
+  
+  $cloudSyncId.value = cloudSyncKey;
+  $storageSelect.value = storageMode;
+
+  function updateStorageUI() {
+    if (storageMode === 'local') {
+      $localWarning.style.display = 'block';
+      $cloudIdGroup.style.display = 'none';
+      loadLocalHistory();
+    } else {
+      $localWarning.style.display = 'none';
+      $cloudIdGroup.style.display = 'flex';
+      socket.emit('get_cloud_history', cloudSyncKey);
+    }
+  }
+
+  $storageSelect.onchange = (e) => {
+    storageMode = e.target.value;
+    localStorage.setItem('storageMode', storageMode);
+    updateStorageUI();
+  };
+
+  $btnFetchCloud.onclick = () => {
+    cloudSyncKey = $cloudSyncId.value.trim();
+    localStorage.setItem('cloudSyncKey', cloudSyncKey);
+    socket.emit('get_cloud_history', cloudSyncKey);
+  };
+
+  $btnHistory.onclick = () => {
+    $historyModal.classList.add('show');
+    updateStorageUI();
+  };
+  $btnCloseHistory.onclick = () => $historyModal.classList.remove('show');
+
+  function loadLocalHistory() {
+    try {
+      historyData = JSON.parse(localStorage.getItem('timerHistory')) || [];
+    } catch(e) { historyData = []; }
+    renderHistoryUI();
+  }
+
+  socket.on('cloud_history_data', (data) => {
+    historyData = data || [];
+    renderHistoryUI();
+  });
+
+  function persistHistory() {
+    if (storageMode === 'local') {
+      localStorage.setItem('timerHistory', JSON.stringify(historyData));
+      renderHistoryUI();
+    } else {
+      socket.emit('save_cloud_history', { syncKey: cloudSyncKey, data: historyData });
+      renderHistoryUI();
+    }
+  }
+
+  $btnSaveRun.onclick = () => {
+    if (state.elapsed === 0) return;
+    const t = formatTime(state.elapsed);
+    const timeString = `${t.h !== '00' ? t.h + ':' : ''}${t.m}:${t.s}.${t.msec}`;
+    
+    const newRecord = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+      room: roomName,
+      time: timeString,
+      mode: state.mode,
+      lapsCount: state.laps.length
+    };
+    
+    historyData.unshift(newRecord); 
+    persistHistory();
+    
+    const originalText = $btnSaveRun.innerHTML;
+    $btnSaveRun.innerHTML = 'SAVED!';
+    setTimeout(() => $btnSaveRun.innerHTML = originalText, 1500);
+  };
+
+  function renderHistoryUI() {
+    $historyList.innerHTML = '';
+    if (historyData.length === 0) {
+      $historyList.innerHTML = '<li style="text-align:center; color: var(--text-muted); font-size: 13px;">No history found.</li>';
+      return;
+    }
+    
+    historyData.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'history-item';
+      li.innerHTML = `
+        <div class="history-item-header">
+          <span>${item.date}</span>
+          <span>Room: ${item.room}</span>
+        </div>
+        <div class="history-item-time">${item.time} ${item.mode === 'countdown' ? '(Timer)' : ''}</div>
+        ${item.lapsCount > 0 ? `<div class="history-item-laps">${item.lapsCount} Laps recorded</div>` : ''}
+      `;
+      $historyList.appendChild(li);
+    });
+  }
+
+  document.getElementById('btn-clear-history').onclick = () => {
+    if (confirm('Are you sure you want to clear all history?')) {
+      historyData = [];
+      persistHistory();
+    }
+  };
+
+  document.getElementById('btn-export').onclick = () => {
+    const dataStr = JSON.stringify(historyData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stopwatch_history_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const $fileImport = document.getElementById('file-import');
+  document.getElementById('btn-import-trigger').onclick = () => $fileImport.click();
+
+  $fileImport.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target.result);
+        if (Array.isArray(importedData)) {
+          historyData = importedData;
+          persistHistory();
+          alert('History imported successfully!');
+        } else {
+          alert('Invalid JSON format.');
+        }
+      } catch (err) {
+        alert('Error parsing JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 </script>
 </body>
