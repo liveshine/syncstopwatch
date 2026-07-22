@@ -1,236 +1,355 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Sync Stopwatch</title>
+  <link rel="manifest" href="/manifest.json">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root[data-theme="dark"] {
+      --bg: #09090b; --text: #fff; --panel: rgba(255,255,255,.05);
+      --border: rgba(255,255,255,.1); --muted: rgba(255,255,255,.5);
+      --green: #4ade80; --green-hover: #22c55e;
+      --red: #f87171; --red-hover: #ef4444; --lap: #60a5fa;
+    }
+    :root[data-theme="light"] {
+      --bg: #f4f4f5; --text: #09090b; --panel: rgba(0,0,0,.05);
+      --border: rgba(0,0,0,.1); --muted: rgba(0,0,0,.5);
+      --green: #16a34a; --green-hover: #15803d;
+      --red: #dc2626; --red-hover: #b91c1c; --lap: #2563eb;
+    }
 
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
       min-height: 100dvh;
-      background: #09090b;
-      color: #fff;
+      background: var(--bg); color: var(--text);
       font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 8dvh; position: relative; overflow-y: auto; overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
     }
 
-    #badge {
-      position: absolute;
-      top: 20px; right: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.1);
-      padding: 8px 16px;
-      border-radius: 999px;
+    /* Top Bar & Toggles */
+    #top-bar {
+      width: min(100%, 800px); padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 40px; z-index: 10;
     }
-
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #4ade80;
-      position: relative;
+    .badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 8px 16px; border-radius: 999px; font-size: 11px; font-weight: 600;
     }
-    .dot::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: #4ade80;
-      animation: ping 1.2s ease-out infinite;
-    }
-    @keyframes ping { 75%,100% { transform: scale(2.2); opacity: 0; } }
-
-    #count {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .15em;
-      color: rgba(255,255,255,.5);
-    }
-
-    #brand {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      opacity: .3;
-      margin-bottom: 48px;
-    }
-    #brand svg { width: 20px; height: 20px; }
-    #brand span {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: .3em;
-      text-transform: uppercase;
-    }
-
-    #timer {
-      font-size: clamp(4rem, 12vw, 10rem);
-      font-weight: 700;
-      line-height: 1;
-      display: flex;
-      align-items: baseline;
-      margin-bottom: 80px;
-    }
-    #timer .sep { opacity: .2; margin: 0 4px; }
-    #timer .frac {
-      font-size: clamp(2rem, 5vw, 5rem);
-      color: rgba(255,255,255,.25);
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+    .role-host { color: var(--green); }
+    .role-viewer { color: var(--muted); }
+    
+    .toggles button {
+      background: none; border: 1px solid var(--border); color: var(--text);
+      padding: 6px 12px; border-radius: 6px; font-size: 10px; cursor: pointer;
       margin-left: 8px;
     }
 
+    /* Settings & Mode (Host Only) */
+    #settings { display: flex; gap: 12px; margin-bottom: 24px; opacity: 0; transition: opacity 0.3s; pointer-events: none;}
+    #settings.is-host { opacity: 1; pointer-events: all; }
+    #settings select, #settings input {
+      background: var(--panel); color: var(--text); border: 1px solid var(--border);
+      padding: 8px 12px; border-radius: 8px; font-family: inherit; font-size: 12px;
+    }
+
+    /* Timer Display */
+    #timer {
+      font-size: clamp(3rem, 10vw, 8rem); font-weight: 700; line-height: 1;
+      display: flex; align-items: baseline; margin-bottom: 40px; z-index: 10;
+    }
+    .sep { opacity: .2; margin: 0 4px; }
+    .frac { font-size: clamp(1.5rem, 4vw, 4rem); color: var(--muted); margin-left: 8px; }
+
+    /* Controls */
     #controls {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      width: min(100%, 480px);
-      padding: 0 24px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      width: min(100%, 540px); padding: 0 24px; z-index: 10; margin-bottom: 40px;
     }
-
-    button {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      padding: 24px 0;
-      border-radius: 16px;
-      border: 2px solid;
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .15em;
-      cursor: pointer;
-      transition: all .2s;
-      background: none;
+    .ctrl-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 20px 0; border-radius: 16px; border: 2px solid;
+      font-family: inherit; font-size: 10px; font-weight: 700; letter-spacing: .1em;
+      cursor: pointer; transition: all .2s; background: var(--bg);
     }
-    button svg { width: 28px; height: 28px; }
-    button:disabled { opacity: .2; cursor: not-allowed; transform: none !important; }
+    .ctrl-btn svg { width: 24px; height: 24px; }
+    .ctrl-btn:disabled { opacity: .2; cursor: not-allowed; transform: none !important; }
 
-    #btn-start { border-color: rgba(74,222,128,.4); color: #4ade80; }
-    #btn-start:not(:disabled):hover { background: #22c55e; border-color: #22c55e; color: #000; transform: translateY(-4px); }
+    #btn-start { border-color: rgba(74,222,128,.4); color: var(--green); }
+    #btn-start:not(:disabled):hover { background: var(--green); border-color: var(--green); color: var(--bg); transform: translateY(-4px); }
+    
+    #btn-lap { border-color: rgba(96,165,250,.4); color: var(--lap); }
+    #btn-lap:not(:disabled):hover { background: var(--lap); border-color: var(--lap); color: var(--bg); transform: translateY(-4px); }
 
-    #btn-stop { border-color: rgba(255,255,255,.1); color: rgba(255,255,255,.2); }
-    #btn-stop.active { border-color: rgba(239,68,68,.4); color: #f87171; }
-    #btn-stop.active:hover { background: #ef4444; border-color: #ef4444; color: #fff; transform: translateY(-4px); }
+    #btn-stop { border-color: var(--border); color: var(--muted); }
+    #btn-stop.active { border-color: rgba(239,68,68,.4); color: var(--red); }
+    #btn-stop.active:hover { background: var(--red); border-color: var(--red); color: var(--bg); transform: translateY(-4px); }
 
-    #btn-reset { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.5); }
-    #btn-reset:not(:disabled):hover { background: rgba(255,255,255,.08); transform: translateY(-4px); }
+    #btn-reset { border-color: var(--border); color: var(--muted); }
+    #btn-reset:not(:disabled):hover { background: var(--panel); transform: translateY(-4px); }
 
+    /* Laps List */
+    #laps {
+      width: min(100%, 480px); padding: 0 24px 40px; list-style: none;
+      display: flex; flex-direction: column-reverse; z-index: 10;
+    }
+    #laps li {
+      display: flex; justify-content: space-between; padding: 12px 0;
+      border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    #laps li span:last-child { color: var(--muted); }
+
+    /* Glow Effect */
     #glow {
-      position: absolute;
-      top: 50%; left: 50%;
-      translate: -50% -50%;
-      width: 500px; height: 500px;
-      border-radius: 50%;
-      filter: blur(130px);
-      opacity: .08;
-      pointer-events: none;
-      transition: background 1s;
+      position: fixed; top: 50%; left: 50%; translate: -50% -50%;
+      width: 50vw; height: 50vw; border-radius: 50%; filter: blur(130px);
+      opacity: .05; pointer-events: none; transition: background 1s; z-index: 0;
     }
   </style>
 </head>
 <body>
 
-<div id="badge">
-  <div class="dot"></div>
-  <span id="count">0 CONNECTED</span>
+<div id="top-bar">
+  <div class="badge">
+    <div class="dot"></div>
+    <span id="room-display">Room: Main</span>
+    <span class="sep">|</span>
+    <span id="role-display" class="role-viewer">Viewer</span>
+  </div>
+  <div class="toggles">
+    <button id="btn-theme">🌓 Theme</button>
+    <button id="btn-audio">🔊 Audio: ON</button>
+  </div>
 </div>
 
-<div id="brand">
-  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-  </svg>
-  <span>Sync Stopwatch</span>
+<div id="settings">
+  <select id="mode-select">
+    <option value="stopwatch">Stopwatch</option>
+    <option value="countdown">Countdown</option>
+  </select>
+  <input type="number" id="countdown-input" value="1" min="1" max="60" style="display:none;" title="Minutes">
 </div>
 
 <div id="timer">
-  <span id="mm">00</span>
-  <span class="sep">:</span>
+  <span id="hh">00</span><span class="sep">:</span>
+  <span id="mm">00</span><span class="sep">:</span>
   <span id="ss">00</span>
   <span class="frac">.<span id="ms">000</span></span>
 </div>
 
 <div id="controls">
-  <button id="btn-start">
-    <svg fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-    START
+  <button class="ctrl-btn" id="btn-start" disabled>
+    <svg fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>START
   </button>
-  <button id="btn-stop" disabled>
-    <svg fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-    STOP
+  <button class="ctrl-btn" id="btn-lap" disabled>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>LAP
   </button>
-  <button id="btn-reset" disabled>
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-      <path d="M3 3v5h5"/>
-    </svg>
-    RESET
+  <button class="ctrl-btn" id="btn-stop" disabled>
+    <svg fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>STOP
+  </button>
+  <button class="ctrl-btn" id="btn-reset" disabled>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>RESET
   </button>
 </div>
 
+<ul id="laps"></ul>
 <div id="glow"></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
-  const $mm    = document.getElementById('mm');
-  const $ss    = document.getElementById('ss');
-  const $ms    = document.getElementById('ms');
-  const $count = document.getElementById('count');
-  const $glow  = document.getElementById('glow');
-  const $start = document.getElementById('btn-start');
-  const $stop  = document.getElementById('btn-stop');
-  const $reset = document.getElementById('btn-reset');
+  // --- PWA REGISTRATION ---
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 
-  let raf = null, t0 = null, elapsed = 0;
+  // --- URL / ROOM PARSING ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomName = urlParams.get('room') || 'main';
+  document.getElementById('room-display').textContent = `Room: ${roomName}`;
+
+  // --- GLOBALS & SOCKET ---
+  const socket = io({ query: { room: roomName } });
+  let state = {};
+  let isHost = false;
+  let raf = null;
+  let timeOffset = 0; // Latency correction
+
+  // --- DOM ELEMENTS ---
+  const $hh = document.getElementById('hh');
+  const $mm = document.getElementById('mm');
+  const $ss = document.getElementById('ss');
+  const $ms = document.getElementById('ms');
+  const $glow = document.getElementById('glow');
+  const $laps = document.getElementById('laps');
+  
+  const $start = document.getElementById('btn-start');
+  const $stop = document.getElementById('btn-stop');
+  const $lap = document.getElementById('btn-lap');
+  const $reset = document.getElementById('btn-reset');
+  
+  const $settings = document.getElementById('settings');
+  const $modeSelect = document.getElementById('mode-select');
+  const $countdownInput = document.getElementById('countdown-input');
+
+  // --- AUDIO CONTEXT ---
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+  let audioEnabled = true;
+
+  document.getElementById('btn-audio').onclick = (e) => {
+    audioEnabled = !audioEnabled;
+    e.target.textContent = `🔊 Audio: ${audioEnabled ? 'ON' : 'OFF'}`;
+  };
+
+  function playTone(type) {
+    if (!audioEnabled || audioCtx.state === 'suspended') return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    
+    if (type === 'start') { osc.frequency.value = 880; osc.type = 'sine'; }
+    if (type === 'stop') { osc.frequency.value = 440; osc.type = 'square'; }
+    if (type === 'lap') { osc.frequency.value = 1200; osc.type = 'triangle'; }
+    if (type === 'finish') { osc.frequency.value = 600; osc.type = 'sawtooth'; }
+    
+    osc.start();
+    gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+    osc.stop(audioCtx.currentTime + 0.3);
+  }
+
+  // --- LATENCY SYNC ---
+  function syncLatency() {
+    socket.emit('sync_ping', Date.now());
+  }
+  socket.on('sync_pong', (data) => {
+    const rtt = Date.now() - data.clientTime;
+    const serverTimeNow = data.serverTime + (rtt / 2);
+    timeOffset = serverTimeNow - Date.now();
+  });
+  setInterval(syncLatency, 5000); // Resync every 5s
+
+  // --- DISPLAY LOGIC ---
+  function formatTime(ms) {
+    if (ms < 0) ms = 0;
+    const h = String(Math.floor(ms / 3600000)).padStart(2, '0');
+    const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
+    const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+    const msec = String(ms % 1000).padStart(3, '0');
+    return { h, m, s, msec };
+  }
 
   function display(ms) {
-    if (ms < 0) ms = 0;
-    $mm.textContent = String(Math.floor(ms / 60000)).padStart(2, '0');
-    $ss.textContent = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
-    $ms.textContent = String(ms % 1000).padStart(3, '0');
+    const t = formatTime(ms);
+    $hh.textContent = t.h; $mm.textContent = t.m;
+    $ss.textContent = t.s; $ms.textContent = t.msec;
+  }
+
+  function renderLaps(lapsArr) {
+    $laps.innerHTML = '';
+    lapsArr.forEach((lapMs, i) => {
+      const splitMs = i === 0 ? lapMs : lapMs - lapsArr[i-1];
+      const tTot = formatTime(lapMs);
+      const tSplt = formatTime(splitMs);
+      
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span>Lap ${i + 1}</span>
+        <span>+${tSplt.m}:${tSplt.s}.${tSplt.msec}</span>
+        <span>${tTot.h}:${tTot.m}:${tTot.s}.${tTot.msec}</span>
+      `;
+      $laps.appendChild(li);
+    });
   }
 
   function tick() {
-    elapsed = Date.now() - t0;
-    display(elapsed);
+    if (state.isRunning) {
+      const now = Date.now() + timeOffset;
+      let currentElapsed = state.elapsed + (now - state.startTime);
+      
+      if (state.mode === 'countdown') {
+        let remaining = state.countdownDuration - currentElapsed;
+        if (remaining <= 0) {
+          remaining = 0;
+          if (isHost) socket.emit('stop'); // Auto-stop
+          playTone('finish');
+        }
+        display(remaining);
+      } else {
+        display(currentElapsed);
+      }
+    }
     raf = requestAnimationFrame(tick);
   }
 
-  function apply(running, startTime, snap) {
-    $start.disabled = running;
-    $stop.disabled  = !running;
-    $stop.classList.toggle('active', running);
-    $reset.disabled = running || elapsed === 0;
-    $glow.style.background = running ? '#4ade80' : elapsed > 0 ? '#ef4444' : 'transparent';
+  // --- STATE MANAGEMENT ---
+  socket.on('sync_state', s => {
+    state = s;
+    isHost = socket.id === state.host;
+    
+    // UI Updates
+    document.getElementById('role-display').textContent = isHost ? 'Host' : 'Viewer';
+    document.getElementById('role-display').className = isHost ? 'role-host' : 'role-viewer';
+    $settings.className = isHost ? 'is-host' : '';
+    
+    // Controls State
+    if (isHost) {
+      $start.disabled = state.isRunning || (state.mode === 'countdown' && state.elapsed >= state.countdownDuration);
+      $stop.disabled = !state.isRunning;
+      $lap.disabled = !state.isRunning || state.mode === 'countdown';
+      $reset.disabled = state.isRunning && state.elapsed === 0;
+    } else {
+      $start.disabled = $stop.disabled = $lap.disabled = $reset.disabled = true;
+    }
+    
+    $stop.classList.toggle('active', state.isRunning);
+    $glow.style.background = state.isRunning ? 'var(--green)' : state.elapsed > 0 ? 'var(--red)' : 'transparent';
+    
+    $modeSelect.value = state.mode;
+    $countdownInput.value = state.countdownDuration / 60000;
+    $countdownInput.style.display = state.mode === 'countdown' ? 'block' : 'none';
 
-    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    renderLaps(state.laps);
 
-    if (running && startTime) {
-      t0 = startTime;
+    if (raf) cancelAnimationFrame(raf);
+    
+    if (state.isRunning) {
       raf = requestAnimationFrame(tick);
     } else {
-      t0 = null;
-      if (snap !== undefined) { elapsed = snap; display(snap); }
+      if (state.mode === 'countdown') {
+        display(Math.max(0, state.countdownDuration - state.elapsed));
+      } else {
+        display(state.elapsed);
+      }
     }
-  }
+  });
 
-  socket.on('timer_state',   s   => apply(s.isRunning, s.startTime));
-  socket.on('timer_started', t   => apply(true, t));
-  socket.on('timer_stopped', dur => apply(false, null, dur));
-  socket.on('timer_reset',   ()  => { elapsed = 0; apply(false, null, 0); });
-  socket.on('connected_count', n => $count.textContent = n + ' CONNECTED');
+  socket.on('audio_cue', type => playTone(type));
 
-  $start.onclick = () => socket.emit('start_timer');
-  $stop.onclick  = () => socket.emit('stop_timer');
-  $reset.onclick = () => socket.emit('reset_timer');
+  // --- EVENT LISTENERS ---
+  const unlockAudio = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); };
+  
+  $start.onclick = () => { unlockAudio(); socket.emit('start'); };
+  $stop.onclick  = () => { unlockAudio(); socket.emit('stop'); };
+  $lap.onclick   = () => { unlockAudio(); socket.emit('lap'); };
+  $reset.onclick = () => { unlockAudio(); socket.emit('reset'); };
+
+  $modeSelect.onchange = (e) => {
+    socket.emit('set_mode', { mode: e.target.value, duration: $countdownInput.value * 60000 });
+  };
+  
+  $countdownInput.onchange = (e) => {
+    socket.emit('set_mode', { mode: 'countdown', duration: e.target.value * 60000 });
+  };
+
+  document.getElementById('btn-theme').onclick = () => {
+    const root = document.documentElement;
+    const newTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', newTheme);
+  };
 </script>
 </body>
 </html>
