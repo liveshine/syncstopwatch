@@ -35,7 +35,7 @@ io.on('connection', socket => {
 
   // Rooms Integration
   const roomId = socket.handshake.query.room || 'main';
-  const aboutText = socket.handshake.query.about || ''; // NEW: Capture "About" from URL
+  const aboutText = socket.handshake.query.about || ''; // Capture "About" from URL
   
   socket.join(roomId);
 
@@ -49,7 +49,7 @@ io.on('connection', socket => {
       laps: [],
       mode: 'stopwatch',
       countdownDuration: 60000,
-      about: aboutText // NEW: Save "About" to the room database
+      about: aboutText // Save "About" to the room database
     });
     saveDB();
   }
@@ -126,86 +126,6 @@ io.on('connection', socket => {
 
   // Listener to handle permission changes
   socket.on('set_permission', (perm) => {
-    if (socket.id !== room.host) return; 
-    room.permission = perm;
-    broadcast();
-  });
-
-  socket.on('disconnect', () => {
-    const clients = io.sockets.adapter.rooms.get(roomId);
-    if (room.host === socket.id && clients && clients.size > 0) {
-      room.host = [...clients][0]; 
-    }
-    broadcast();
-  });
-});
-
-  const room = rooms.get(roomId);
-
-  // Role-Based Permissions (Assign host if room is empty)
-  if (!room.host || !io.sockets.sockets.get(room.host)) {
-    room.host = socket.id;
-    saveDB();
-  }
-
-  const broadcast = () => {
-    const clientsCount = io.sockets.adapter.rooms.get(roomId)?.size || 0;
-    io.to(roomId).emit('sync_state', { ...room, clientsCount });
-    saveDB();
-  };
-
-  broadcast();
-
-  // Helper function to check if a user is allowed to control the timer
-  const canControl = (id) => room.permission === 'anyone' || id === room.host;
-
-  socket.on('start', () => {
-    if (!canControl(socket.id) || room.isRunning) return;
-    room.startTime = Date.now() - room.elapsed;
-    room.isRunning = true;
-    io.to(roomId).emit('audio_cue', 'start');
-    broadcast();
-  });
-
-  socket.on('stop', () => {
-    if (!canControl(socket.id) || !room.isRunning) return;
-    room.elapsed = Date.now() - room.startTime;
-    room.isRunning = false;
-    io.to(roomId).emit('audio_cue', 'stop');
-    broadcast();
-  });
-
-  socket.on('lap', () => {
-    if (!canControl(socket.id) || !room.isRunning) return;
-    const current = Date.now() - room.startTime;
-    room.laps.push(current);
-    io.to(roomId).emit('audio_cue', 'lap');
-    broadcast();
-  });
-
-  socket.on('reset', () => {
-    if (!canControl(socket.id)) return;
-    room.startTime = null;
-    room.isRunning = false;
-    room.elapsed = 0;
-    room.laps = [];
-    io.to(roomId).emit('audio_cue', 'reset');
-    broadcast();
-  });
-
-  socket.on('set_mode', (data) => {
-    if (!canControl(socket.id)) return;
-    room.mode = data.mode;
-    if (data.duration) room.countdownDuration = data.duration;
-    room.startTime = null;
-    room.isRunning = false;
-    room.elapsed = 0;
-    room.laps = [];
-    broadcast();
-  });
-
-  // Listener to handle permission changes
-  socket.on('set_permission', (perm) => {
     if (socket.id !== room.host) return; // Only the host can change this
     room.permission = perm;
     broadcast();
@@ -214,7 +134,7 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     const clients = io.sockets.adapter.rooms.get(roomId);
     if (room.host === socket.id && clients && clients.size > 0) {
-      room.host = [...clients][0]; // Pass host to the next user
+      room.host = [...clients][0]; // Pass host to the next user in line
     }
     broadcast();
   });
