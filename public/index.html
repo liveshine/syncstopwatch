@@ -89,7 +89,7 @@
       .room-badge { padding: 6px 10px; font-size: 11px; gap: 6px; }
       #btn-share { padding: 4px 6px; font-size: 10px; }
       .toggles button { width: 34px; height: 34px; font-size: 14px; }
-      #btn-share span { display: none; } /* Hides "COPY" text to save space */
+      #btn-share span { display: none; }
     }
 
     /* --- TIMER DISPLAY --- */
@@ -116,7 +116,7 @@
     }
     
     .ctrl-btn {
-      flex: 1 1 calc(50% - 16px); /* Mobile: 2x2 grid */
+      flex: 1 1 calc(50% - 16px); 
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
       padding: 24px 0; border-radius: 24px; border: 1.5px solid var(--border);
       font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
@@ -126,7 +126,7 @@
     }
     
     @media (min-width: 768px) {
-      .ctrl-btn { flex: 1 1 0; padding: 32px 0; } /* Desktop: 1x4 row */
+      .ctrl-btn { flex: 1 1 0; padding: 32px 0; } 
     }
 
     .ctrl-btn svg { width: 28px; height: 28px; transition: transform 0.2s; }
@@ -220,6 +220,10 @@
   </div>
   
   <div class="toggles">
+    <!-- NEW: Create Private Room Button -->
+    <button id="btn-new-room" title="Create New Private Room">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+    </button>
     <button id="btn-audio" title="Toggle Audio">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>
     </button>
@@ -339,6 +343,14 @@
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioCtx = new AudioContext();
   let audioEnabled = true;
+
+  // NEW: Create Private Room Logic
+  document.getElementById('btn-new-room').onclick = () => {
+    // Generates a random 6-character alphanumeric string
+    const newRoomId = Math.random().toString(36).substring(2, 8);
+    // Reload the page with the new unique room ID
+    window.location.href = `?room=${newRoomId}`;
+  };
 
   document.getElementById('btn-audio').onclick = (e) => {
     audioEnabled = !audioEnabled;
@@ -465,7 +477,6 @@
     document.getElementById('role-display').textContent = isHost ? 'Host' : (canControl ? 'Co-Host' : 'Viewer');
     document.getElementById('role-display').className = isHost ? 'role-host' : (canControl ? 'role-host' : 'role-viewer');
     
-    // JS FIX: Use 'flex' instead of 'block' to keep the SVG icon perfectly centered
     $btnSettings.style.display = canControl ? 'flex' : 'none';
     document.getElementById('perm-group').style.display = isHost ? 'flex' : 'none';
     $permSelect.value = state.permission;
