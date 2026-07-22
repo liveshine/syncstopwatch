@@ -6,25 +6,24 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-// Point exactly to the public folder
+// UPGRADE 1: Open the server to all phone browsers (CORS bypass)
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
-// BULLETPROOF ROUTING FIX: Changed from app.get('*') to app.use() to fix the Express 5 crash
 app.use((req, res) => {
   const indexPath = path.join(publicPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
-    // This will print on your screen if the folder structure is wrong
-    res.status(404).send(`
-      <h2 style="font-family: sans-serif;">Error: Missing File</h2>
-      <p style="font-family: sans-serif;">The server is awake, but it can't find your HTML file.</p>
-      <p style="font-family: sans-serif;">It is strictly looking inside this exact folder path:<br> <b>${publicPath}</b></p>
-      <p style="font-family: sans-serif;">Ensure your folder in GitHub is named exactly "<b>public</b>" (all lowercase) and the file is named "<b>index.html</b>".</p>
-    `);
+    res.status(404).send(`<h2>Error: Missing File</h2><p>Folder must be named "public".</p>`);
   }
 });
 
@@ -34,6 +33,11 @@ let isRunning = false;
 io.on('connection', socket => {
   socket.emit('timer_state', { isRunning, startTime });
   io.emit('connected_count', io.engine.clientsCount);
+
+  // UPGRADE 2: If a phone wakes up from sleep, let it ask for the current time
+  socket.on('request_state', () => {
+    socket.emit('timer_state', { isRunning, startTime });
+  });
 
   socket.on('start_timer', () => {
     if (!isRunning) {
