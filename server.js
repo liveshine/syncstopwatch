@@ -7,7 +7,6 @@ const fs = require('fs');
 const app = express();
 const server = http.createServer(app);
 
-// UPGRADE 1: Open the server to all phone browsers (CORS bypass)
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -31,25 +30,27 @@ let startTime = null;
 let isRunning = false;
 
 io.on('connection', socket => {
-  socket.emit('timer_state', { isRunning, startTime });
+  // CLOCK DRIFT FIX: Send how long the timer has been running, not the raw timestamp
+  const elapsedSoFar = isRunning ? (Date.now() - startTime) : 0;
+  socket.emit('timer_state', { isRunning, elapsedSoFar });
   io.emit('connected_count', io.engine.clientsCount);
 
-  // UPGRADE 2: If a phone wakes up from sleep, let it ask for the current time
   socket.on('request_state', () => {
-    socket.emit('timer_state', { isRunning, startTime });
+    const elapsedSoFar = isRunning ? (Date.now() - startTime) : 0;
+    socket.emit('timer_state', { isRunning, elapsedSoFar });
   });
 
   socket.on('start_timer', () => {
     if (!isRunning) {
       startTime = Date.now();
       isRunning = true;
-      io.emit('timer_started', startTime);
+      io.emit('timer_started'); // Just sends "GO!", no timestamp needed
     }
   });
 
   socket.on('stop_timer', () => {
     if (isRunning) {
-      const dur = Date.now() - startTime;
+      const dur = Date.now() - startTime; // Server calculates the exact official time
       isRunning = false;
       io.emit('timer_stopped', dur);
     }
