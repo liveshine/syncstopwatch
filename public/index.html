@@ -51,7 +51,7 @@
       margin-left: 8px;
     }
 
-    /* Settings & Mode (Host Only) */
+    /* Settings & Mode */
     #settings { display: flex; gap: 12px; margin-bottom: 24px; opacity: 0; transition: opacity 0.3s; pointer-events: none;}
     #settings.is-host { opacity: 1; pointer-events: all; }
     #settings select, #settings input {
@@ -129,6 +129,11 @@
 </div>
 
 <div id="settings">
+  <select id="perm-select">
+    <option value="host_only">🔒 Control: Host Only</option>
+    <option value="anyone">🌍 Control: Everyone</option>
+  </select>
+
   <select id="mode-select">
     <option value="stopwatch">Stopwatch</option>
     <option value="countdown">Countdown</option>
@@ -163,22 +168,19 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  // --- PWA REGISTRATION ---
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 
-  // --- URL / ROOM PARSING ---
   const urlParams = new URLSearchParams(window.location.search);
   const roomName = urlParams.get('room') || 'main';
   document.getElementById('room-display').textContent = `Room: ${roomName}`;
 
-  // --- GLOBALS & SOCKET ---
   const socket = io({ query: { room: roomName } });
   let state = {};
   let isHost = false;
   let raf = null;
-  let timeOffset = 0; // Latency correction
+  let timeOffset = 0; 
 
-  // --- DOM ELEMENTS ---
+  // DOM Elements
   const $hh = document.getElementById('hh');
   const $mm = document.getElementById('mm');
   const $ss = document.getElementById('ss');
@@ -192,10 +194,11 @@
   const $reset = document.getElementById('btn-reset');
   
   const $settings = document.getElementById('settings');
+  const $permSelect = document.getElementById('perm-select');
   const $modeSelect = document.getElementById('mode-select');
   const $countdownInput = document.getElementById('countdown-input');
 
-  // --- AUDIO CONTEXT ---
+  // Fixed Audio Logic
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioCtx = new AudioContext();
   let audioEnabled = true;
@@ -205,7 +208,7 @@
     e.target.textContent = `🔊 Audio: ${audioEnabled ? 'ON' : 'OFF'}`;
   };
 
-function playTone(type) {
+  function playTone(type) {
     if (!audioEnabled || audioCtx.state === 'suspended') return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -218,28 +221,23 @@ function playTone(type) {
     if (type === 'lap') { osc.frequency.value = 1200; osc.type = 'triangle'; }
     if (type === 'finish') { osc.frequency.value = 600; osc.type = 'sawtooth'; }
     
-    // THE FIX: We need to specify "gain.gain" to change the volume, 
-    // and explicitly set the starting volume to 1 before ramping it down.
     gain.gain.setValueAtTime(1, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
     
     osc.start();
     osc.stop(audioCtx.currentTime + 0.3);
   }
- 
 
-  // --- LATENCY SYNC ---
-  function syncLatency() {
-    socket.emit('sync_ping', Date.now());
-  }
+  // Latency Sync
+  function syncLatency() { socket.emit('sync_ping', Date.now()); }
   socket.on('sync_pong', (data) => {
     const rtt = Date.now() - data.clientTime;
     const serverTimeNow = data.serverTime + (rtt / 2);
     timeOffset = serverTimeNow - Date.now();
   });
-  setInterval(syncLatency, 5000); // Resync every 5s
+  setInterval(syncLatency, 5000);
 
-  // --- DISPLAY LOGIC ---
+  // Display Logic
   function formatTime(ms) {
     if (ms < 0) ms = 0;
     const h = String(Math.floor(ms / 3600000)).padStart(2, '0');
@@ -261,7 +259,6 @@ function playTone(type) {
       const splitMs = i === 0 ? lapMs : lapMs - lapsArr[i-1];
       const tTot = formatTime(lapMs);
       const tSplt = formatTime(splitMs);
-      
       const li = document.createElement('li');
       li.innerHTML = `
         <span>Lap ${i + 1}</span>
@@ -281,7 +278,7 @@ function playTone(type) {
         let remaining = state.countdownDuration - currentElapsed;
         if (remaining <= 0) {
           remaining = 0;
-          if (isHost) socket.emit('stop'); // Auto-stop
+          if (isHost) socket.emit('stop'); 
           playTone('finish');
         }
         display(remaining);
@@ -292,18 +289,20 @@ function playTone(type) {
     raf = requestAnimationFrame(tick);
   }
 
-  // --- STATE MANAGEMENT ---
+  // State Management
   socket.on('sync_state', s => {
     state = s;
     isHost = socket.id === state.host;
+    const canControl = isHost || state.permission === 'anyone';
     
-    // UI Updates
-    document.getElementById('role-display').textContent = isHost ? 'Host' : 'Viewer';
-    document.getElementById('role-display').className = isHost ? 'role-host' : 'role-viewer';
-    $settings.className = isHost ? 'is-host' : '';
+    document.getElementById('role-display').textContent = isHost ? 'Host' : (canControl ? 'Co-Host' : 'Viewer');
+    document.getElementById('role-display').className = isHost ? 'role-host' : (canControl ? 'role-host' : 'role-viewer');
     
-    // Controls State
-    if (isHost) {
+    $settings.className = canControl ? 'is-host' : '';
+    $permSelect.style.display = isHost ? 'block' : 'none';
+    $permSelect.value = state.permission;
+
+    if (canControl) {
       $start.disabled = state.isRunning || (state.mode === 'countdown' && state.elapsed >= state.countdownDuration);
       $stop.disabled = !state.isRunning;
       $lap.disabled = !state.isRunning || state.mode === 'countdown';
@@ -336,7 +335,7 @@ function playTone(type) {
 
   socket.on('audio_cue', type => playTone(type));
 
-  // --- EVENT LISTENERS ---
+  // Event Listeners
   const unlockAudio = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); };
   
   $start.onclick = () => { unlockAudio(); socket.emit('start'); };
@@ -344,13 +343,9 @@ function playTone(type) {
   $lap.onclick   = () => { unlockAudio(); socket.emit('lap'); };
   $reset.onclick = () => { unlockAudio(); socket.emit('reset'); };
 
-  $modeSelect.onchange = (e) => {
-    socket.emit('set_mode', { mode: e.target.value, duration: $countdownInput.value * 60000 });
-  };
-  
-  $countdownInput.onchange = (e) => {
-    socket.emit('set_mode', { mode: 'countdown', duration: e.target.value * 60000 });
-  };
+  $permSelect.onchange = (e) => socket.emit('set_permission', e.target.value);
+  $modeSelect.onchange = (e) => socket.emit('set_mode', { mode: e.target.value, duration: $countdownInput.value * 60000 });
+  $countdownInput.onchange = (e) => socket.emit('set_mode', { mode: 'countdown', duration: e.target.value * 60000 });
 
   document.getElementById('btn-theme').onclick = () => {
     const root = document.documentElement;
