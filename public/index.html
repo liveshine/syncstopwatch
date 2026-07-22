@@ -102,7 +102,7 @@
     #cd-display { font-size: 16px; font-weight: 700; }
     .btn-primary { background: var(--green); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; }
     .btn-primary:hover { background: #10b981; transform: translateY(-2px); }
-    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
     .btn-secondary:hover { background: var(--text); color: var(--bg); }
 
     /* --- HISTORY ITEMS --- */
@@ -113,11 +113,23 @@
 
     #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
 
-    /* --- COLLAPSIBLE SETTINGS (Seamless native styling) --- */
+    /* --- BEAUTIFUL UI COLLAPSIBLE SETTINGS CARDS --- */
+    details.setting-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 16px;
+      transition: all 0.2s;
+    }
+    details.setting-group[open] {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
     details.setting-group summary {
-      font-size: 12px;
+      margin: -16px; /* Offset the parent padding so the clickable area is full */
+      padding: 16px;
+      font-size: 13px;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--text);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       cursor: pointer;
@@ -131,16 +143,27 @@
     details.setting-group summary::-webkit-details-marker { display: none; }
     details.setting-group summary::after {
       content: '▼';
-      font-size: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
       transition: transform 0.3s ease;
     }
     details.setting-group[open] summary::after {
       transform: rotate(180deg);
+      color: var(--text);
     }
     details.setting-group .collapsible-inner {
+      margin-top: 24px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
+    }
+    .summary-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .summary-title svg {
+      color: var(--blue);
     }
   </style>
 </head>
@@ -172,18 +195,11 @@
     <div class="page" id="page-history">
       <h2 class="page-header">History</h2>
       <div class="page-content-wrapper">
-        
-        <div style="display: flex; gap: 10px;">
-          <button id="btn-export" class="btn-primary" style="background: var(--blue);">Export JSON</button>
-          <button id="btn-import-trigger" class="btn-primary" style="background: var(--text-muted);">Import JSON</button>
-          <input type="file" id="file-import" accept=".json" style="display: none;">
-        </div>
-
-        <div class="setting-group" style="margin-top: 10px;">
+        <div class="setting-group">
           <label>Saved Runs</label>
           <ul id="history-list" style="list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0;"></ul>
         </div>
-        <button id="btn-clear-history" class="btn-primary" style="background: var(--red); margin-top: 20px;">Clear All History</button>
+        <button id="btn-clear-history" class="btn-primary" style="background: var(--red); margin-top: 10px;">Clear All History</button>
       </div>
     </div>
 
@@ -215,15 +231,15 @@
     <div class="page" id="page-create">
       <h2 class="page-header">Create Room</h2>
       <div class="page-content-wrapper">
-        <div class="setting-group">
+        <div class="setting-group" style="background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid var(--border);">
           <label>Room Name (Required)</label>
           <input type="text" id="input-room-name" placeholder="e.g. Morning Workout" required autocomplete="off">
-        </div>
-        <div class="setting-group">
-          <label>About Room (Optional)</label>
+          
+          <label style="margin-top: 10px;">About Room (Optional)</label>
           <input type="text" id="input-room-about" placeholder="e.g. 5K Sprint Training" autocomplete="off">
+          
+          <button id="btn-submit-room" class="btn-primary" style="margin-top: 16px;">Create & Join</button>
         </div>
-        <button id="btn-submit-room" class="btn-primary" style="margin-top: 10px;">Create & Join</button>
       </div>
     </div>
 
@@ -232,8 +248,14 @@
       <h2 class="page-header">Settings</h2>
       <div class="page-content-wrapper">
         
-        <details class="setting-group" id="perm-group" style="display:none;">
-          <summary>Permissions (Host Only)</summary>
+        <!-- Permissions -->
+        <details class="setting-group" id="perm-group" style="display:none; flex-direction:column;">
+          <summary>
+            <div class="summary-title">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+              Permissions (Host Only)
+            </div>
+          </summary>
           <div class="collapsible-inner">
             <select id="perm-select">
               <option value="host_only">Host Only (Just Me)</option>
@@ -242,25 +264,42 @@
           </div>
         </details>
 
-        <div class="setting-group" id="timer-settings-group" style="display:none;">
-          <label>Timer Mode</label>
-          <select id="mode-select">
-            <option value="stopwatch">Stopwatch (Count Up)</option>
-            <option value="countdown">Countdown (Count Down)</option>
-          </select>
-        </div>
-        
-        <div class="setting-group" id="countdown-settings" style="display:none;">
-          <label>Start From</label>
-          <div id="countdown-wrap">
-            <button class="cd-btn" id="cd-minus">-</button>
-            <span id="cd-display">1 min</span>
-            <button class="cd-btn" id="cd-plus">+</button>
+        <!-- Timer Configuration -->
+        <details class="setting-group" id="timer-settings-group" style="display:none; flex-direction:column;">
+          <summary>
+            <div class="summary-title">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Timer Mode
+            </div>
+          </summary>
+          <div class="collapsible-inner">
+            <div class="setting-group">
+              <label>Mode Select</label>
+              <select id="mode-select">
+                <option value="stopwatch">Stopwatch (Count Up)</option>
+                <option value="countdown">Countdown (Count Down)</option>
+              </select>
+            </div>
+            
+            <div class="setting-group" id="countdown-settings" style="display:none; margin-top: 6px;">
+              <label>Start From</label>
+              <div id="countdown-wrap">
+                <button class="cd-btn" id="cd-minus">-</button>
+                <span id="cd-display">1 min</span>
+                <button class="cd-btn" id="cd-plus">+</button>
+              </div>
+            </div>
           </div>
-        </div>
+        </details>
 
+        <!-- Save Destination -->
         <details class="setting-group" open>
-          <summary>Save Destination</summary>
+          <summary>
+            <div class="summary-title">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+              Save Destination
+            </div>
+          </summary>
           <div class="collapsible-inner">
             <select id="storage-select">
               <option value="local">Local Device (Browser)</option>
@@ -278,8 +317,37 @@
           </div>
         </details>
 
+        <!-- Data Management (Import / Export Moved Here) -->
         <details class="setting-group">
-          <summary>App Preferences</summary>
+          <summary>
+            <div class="summary-title">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+              Data Management
+            </div>
+          </summary>
+          <div class="collapsible-inner">
+            <div style="display: flex; gap: 10px; width: 100%;">
+              <button id="btn-export" class="btn-primary" style="background: var(--blue); flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Export JSON
+              </button>
+              <button id="btn-import-trigger" class="btn-primary" style="background: var(--text-muted); flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Import JSON
+              </button>
+              <input type="file" id="file-import" accept=".json" style="display: none;">
+            </div>
+          </div>
+        </details>
+
+        <!-- App Preferences -->
+        <details class="setting-group">
+          <summary>
+            <div class="summary-title">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              App Preferences
+            </div>
+          </summary>
           <div class="collapsible-inner">
             <button id="btn-theme" class="btn-secondary">
               <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -590,7 +658,7 @@
   let historyData = [];
   let storageMode = localStorage.getItem('storageMode') || 'local';
   let cloudSyncKey = localStorage.getItem('cloudSyncKey') || Math.random().toString(36).substr(2, 9).toUpperCase();
-  let lastSavedElapsed = -1; // NEW: Track the last saved state to prevent duplicates
+  let lastSavedElapsed = -1; 
   
   localStorage.setItem('cloudSyncKey', cloudSyncKey);
   
@@ -652,13 +720,11 @@
   }
 
   $btnSaveRun.onclick = () => {
-    // Prevent saving if it's already saved or timer is at 0
     if (state.elapsed === 0 || state.elapsed === lastSavedElapsed) return;
     
     const t = formatTime(state.elapsed);
     const timeString = `${t.h !== '00' ? t.h + ':' : ''}${t.m}:${t.s}.${t.msec}`;
     
-    // NEW: Format date with 12-hour AM/PM format
     const timeFormatOpts = { hour: 'numeric', minute: '2-digit', hour12: true };
     const dateFormatted = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString('en-US', timeFormatOpts);
     
@@ -674,7 +740,7 @@
     historyData.unshift(newRecord); 
     persistHistory();
     
-    lastSavedElapsed = state.elapsed; // Update the tracking variable
+    lastSavedElapsed = state.elapsed; 
     
     const originalText = $btnSaveRun.innerHTML;
     $btnSaveRun.innerHTML = 'SAVED!';
