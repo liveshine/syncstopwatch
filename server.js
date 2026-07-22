@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const fs = require('fs'); // Added filesystem module to check files
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,8 +12,8 @@ const io = new Server(server);
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
-// BULLETPROOF ROUTING: If the file is missing, tell you exactly why
-app.get('*', (req, res) => {
+// BULLETPROOF ROUTING FIX: Changed from app.get('*') to app.use() to fix the Express 5 crash
+app.use((req, res) => {
   const indexPath = path.join(publicPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
