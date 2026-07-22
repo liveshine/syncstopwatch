@@ -143,30 +143,6 @@
       <h2 class="page-header">History</h2>
       <div class="page-content-wrapper">
         <div class="setting-group">
-          <label>Save Destination</label>
-          <select id="storage-select">
-            <option value="local">Local Device (Browser)</option>
-            <option value="cloud">Cloud Storage</option>
-          </select>
-        </div>
-        
-        <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
-          ⚠️ <strong>Warning:</strong> Local data is saved only on this browser.
-        </p>
-        <div class="setting-group" id="cloud-id-group" style="display: none;">
-          <label>Cloud Sync ID</label>
-          <input type="text" id="cloud-sync-id" autocomplete="off">
-          <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-          <button id="btn-export" class="btn-primary" style="background: var(--blue);">Export JSON</button>
-          <button id="btn-import-trigger" class="btn-primary" style="background: var(--text-muted);">Import JSON</button>
-          <input type="file" id="file-import" accept=".json" style="display: none;">
-        </div>
-
-        <div class="setting-group" style="margin-top: 10px;">
-          <label>Saved Runs</label>
           <ul id="history-list" style="list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0;"></ul>
         </div>
         <button id="btn-clear-history" class="btn-primary" style="background: var(--red); margin-top: 20px;">Clear All History</button>
@@ -253,6 +229,36 @@
             Toggle Audio Tones
           </button>
         </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
+
+        <!-- MOVED FROM HISTORY: Data & Storage Settings -->
+        <div class="setting-group">
+          <label>Save Destination</label>
+          <select id="storage-select">
+            <option value="local">Local Device (Browser)</option>
+            <option value="cloud">Cloud Storage</option>
+          </select>
+        </div>
+        
+        <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
+          ⚠️ <strong>Warning:</strong> Local data is saved only on this browser.
+        </p>
+        <div class="setting-group" id="cloud-id-group" style="display: none;">
+          <label>Cloud Sync ID</label>
+          <input type="text" id="cloud-sync-id" autocomplete="off">
+          <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
+        </div>
+
+        <div class="setting-group">
+          <label>Data Management</label>
+          <div style="display: flex; gap: 10px;">
+            <button id="btn-export" class="btn-primary" style="flex: 1; background: var(--blue);">Export JSON</button>
+            <button id="btn-import-trigger" class="btn-primary" style="flex: 1; background: var(--text-muted);">Import JSON</button>
+            <input type="file" id="file-import" accept=".json" style="display: none;">
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -336,7 +342,6 @@
     if(index === 2) setTimeout(() => $inputRoomName.focus(), 300);
   }
   
-  // Set initial view to Timer
   goToPage(1); 
 
   $swipeWrapper.addEventListener('touchstart', (e) => {
@@ -492,7 +497,6 @@
         $aboutDisplay.style.display = 'none';
     }
 
-    // Toggle setting blocks based on permission
     $permGroup.style.display = isHost ? 'flex' : 'none';
     $timerSettingsGroup.style.display = canControl ? 'flex' : 'none';
     $permSelect.value = state.permission;
@@ -550,7 +554,7 @@
   let historyData = [];
   let storageMode = localStorage.getItem('storageMode') || 'local';
   let cloudSyncKey = localStorage.getItem('cloudSyncKey') || Math.random().toString(36).substr(2, 9).toUpperCase();
-  let lastSavedElapsed = -1; // NEW: Track the last saved state to prevent duplicates
+  let lastSavedElapsed = -1; 
   
   localStorage.setItem('cloudSyncKey', cloudSyncKey);
   
@@ -612,13 +616,11 @@
   }
 
   $btnSaveRun.onclick = () => {
-    // Prevent saving if it's already saved or timer is at 0
     if (state.elapsed === 0 || state.elapsed === lastSavedElapsed) return;
     
     const t = formatTime(state.elapsed);
     const timeString = `${t.h !== '00' ? t.h + ':' : ''}${t.m}:${t.s}.${t.msec}`;
     
-    // NEW: Format date with 12-hour AM/PM format
     const timeFormatOpts = { hour: 'numeric', minute: '2-digit', hour12: true };
     const dateFormatted = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString('en-US', timeFormatOpts);
     
@@ -634,7 +636,7 @@
     historyData.unshift(newRecord); 
     persistHistory();
     
-    lastSavedElapsed = state.elapsed; // Update the tracking variable
+    lastSavedElapsed = state.elapsed;
     
     const originalText = $btnSaveRun.innerHTML;
     $btnSaveRun.innerHTML = 'SAVED!';
