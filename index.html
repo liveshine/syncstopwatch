@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sync Stopwatch</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100dvh;
+      background: #09090b;
+      color: #fff;
+      font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #badge {
+      position: absolute;
+      top: 20px; right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: 8px 16px;
+      border-radius: 999px;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      position: relative;
+    }
+    .dot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: ping 1.2s ease-out infinite;
+    }
+    @keyframes ping { 75%,100% { transform: scale(2.2); opacity: 0; } }
+
+    #count {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .15em;
+      color: rgba(255,255,255,.5);
+    }
+
+    #brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: .3;
+      margin-bottom: 48px;
+    }
+    #brand svg { width: 20px; height: 20px; }
+    #brand span {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+    }
+
+    #timer {
+      font-size: clamp(4rem, 12vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 80px;
+    }
+    #timer .sep { opacity: .2; margin: 0 4px; }
+    #timer .frac {
+      font-size: clamp(2rem, 5vw, 5rem);
+      color: rgba(255,255,255,.25);
+      margin-left: 8px;
+    }
+
+    #controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: min(100%, 480px);
+      padding: 0 24px;
+    }
+
+    button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 0;
+      border-radius: 16px;
+      border: 2px solid;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      cursor: pointer;
+      transition: all .2s;
+      background: none;
+    }
+    button svg { width: 28px; height: 28px; }
+    button:disabled { opacity: .2; cursor: not-allowed; transform: none !important; }
+
+    #btn-start { border-color: rgba(74,222,128,.4); color: #4ade80; }
+    #btn-start:not(:disabled):hover { background: #22c55e; border-color: #22c55e; color: #000; transform: translateY(-4px); }
+
+    #btn-stop { border-color: rgba(255,255,255,.1); color: rgba(255,255,255,.2); }
+    #btn-stop.active { border-color: rgba(239,68,68,.4); color: #f87171; }
+    #btn-stop.active:hover { background: #ef4444; border-color: #ef4444; color: #fff; transform: translateY(-4px); }
+
+    #btn-reset { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.5); }
+    #btn-reset:not(:disabled):hover { background: rgba(255,255,255,.08); transform: translateY(-4px); }
+
+    #glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      translate: -50% -50%;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      filter: blur(130px);
+      opacity: .08;
+      pointer-events: none;
+      transition: background 1s;
+    }
+  </style>
+</head>
+<body>
+
+<div id="badge">
+  <div class="dot"></div>
+  <span id="count">0 CONNECTED</span>
+</div>
+
+<div id="brand">
+  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+  </svg>
+  <span>Sync Stopwatch</span>
+</div>
+
+<div id="timer">
+  <span id="mm">00</span>
+  <span class="sep">:</span>
+  <span id="ss">00</span>
+  <span class="frac">.<span id="ms">000</span></span>
+</div>
+
+<div id="controls">
+  <button id="btn-start">
+    <svg fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    START
+  </button>
+  <button id="btn-stop" disabled>
+    <svg fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+    STOP
+  </button>
+  <button id="btn-reset" disabled>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+      <path d="M3 3v5h5"/>
+    </svg>
+    RESET
+  </button>
+</div>
+
+<div id="glow"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const $mm    = document.getElementById('mm');
+  const $ss    = document.getElementById('ss');
+  const $ms    = document.getElementById('ms');
+  const $count = document.getElementById('count');
+  const $glow  = document.getElementById('glow');
+  const $start = document.getElementById('btn-start');
+  const $stop  = document.getElementById('btn-stop');
+  const $reset = document.getElementById('btn-reset');
+
+  let raf = null, t0 = null, elapsed = 0;
+
+  function display(ms) {
+    if (ms < 0) ms = 0;
+    $mm.textContent = String(Math.floor(ms / 60000)).padStart(2, '0');
+    $ss.textContent = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+    $ms.textContent = String(ms % 1000).padStart(3, '0');
+  }
+
+  function tick() {
+    elapsed = Date.now() - t0;
+    display(elapsed);
+    raf = requestAnimationFrame(tick);
+  }
+
+  function apply(running, startTime, snap) {
+    $start.disabled = running;
+    $stop.disabled  = !running;
+    $stop.classList.toggle('active', running);
+    $reset.disabled = !running && elapsed === 0;
+    $glow.style.background = running ? '#4ade80' : elapsed > 0 ? '#ef4444' : 'transparent';
+
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+
+    if (running && startTime) {
+      t0 = startTime;
+      raf = requestAnimationFrame(tick);
+    } else {
+      t0 = null;
+      if (snap !== undefined) { elapsed = snap; display(snap); }
+    }
+  }
+
+  socket.on('timer_state',   s   => apply(s.isRunning, s.startTime));
+  socket.on('timer_started', t   => apply(true, t));
+  socket.on('timer_stopped', dur => { apply(false, null, dur); $reset.disabled = false; });
+  socket.on('timer_reset',   ()  => { elapsed = 0; apply(false, null, 0); });
+  socket.on('connected_count', n => $count.textContent = n + ' CONNECTED');
+
+  $start.onclick = () => socket.emit('start_timer');
+  $stop.onclick  = () => socket.emit('stop_timer');
+  $reset.onclick = () => socket.emit('reset_timer');
+</script>
+</body>
+</html>
