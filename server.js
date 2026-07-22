@@ -38,6 +38,12 @@ io.on('connection', socket => {
     io.emit('timer_reset');
   });
 
+  // --- NEW LATENCY PING CHECK ---
+  socket.on('ping_check', (timestamp, callback) => {
+    callback(); 
+  });
+  // ------------------------------
+
   socket.on('disconnect', () => {
     io.emit('connected_count', io.engine.clientsCount);
   });
