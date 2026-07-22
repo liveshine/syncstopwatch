@@ -174,7 +174,7 @@
       <p id="local-warning" style="color: var(--red); font-size: 11px; margin-top: 4px;">⚠️ Warning: If you clear browser data or delete the app, device storage will be permanently lost.</p>
     </div>
 
-    <!-- Sync Key Input (Only visible when Cloud is selected) -->
+    <!-- Sync Key Input -->
     <div class="setting-group" id="cloud-key-group" style="display:none;">
       <label>Your Cloud Sync Key (Enter on other devices to sync)</label>
       <div style="display:flex; gap:8px;">
@@ -200,7 +200,7 @@
   </div>
 </div>
 
-<!-- RESTORED: Settings Modal with Countdown Time Option -->
+<!-- Settings Modal (FIXED: One single settings modal containing everything) -->
 <div id="settings-modal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -219,7 +219,7 @@
       </select>
     </div>
     
-    <!-- This is the Start From section that was accidentally removed! -->
+    <!-- Restored Countdown Settings UI -->
     <div class="setting-group" id="countdown-settings" style="display:none;">
       <label>Start From</label>
       <div id="countdown-wrap">
@@ -278,7 +278,7 @@
   
   let state = {}; let isHost = false; let raf = null; let timeOffset = 0; 
   let myHistory = []; 
-  let cdVal = 1; // Restored Countdown Variable
+  let cdVal = 1; // Tracks the countdown minutes
 
   // DOM
   const $hh = document.getElementById('hh'); const $hColon = document.getElementById('h-colon');
@@ -538,7 +538,7 @@
     
     $modeSelect.value = state.mode;
     
-    // RESTORED: Update UI for Countdown Settings
+    // UI Update for Countdown Settings
     cdVal = state.countdownDuration / 60000;
     $cdDisplay.textContent = cdVal + ' min';
     $cdSettings.style.display = state.mode === 'countdown' ? 'flex' : 'none';
@@ -563,7 +563,7 @@
   
   document.getElementById('perm-select').onchange = (e) => socket.emit('set_permission', e.target.value);
   
-  // RESTORED: Countdown Event Listeners
+  // COUNTDOWN EVENT LISTENERS
   $modeSelect.onchange = (e) => socket.emit('set_mode', { mode: e.target.value, duration: cdVal * 60000 });
   
   document.getElementById('cd-minus').onclick = () => {
