@@ -2,57 +2,121 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+const io = new Server(server);
 
-// Serve static files directly from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-let startTime = null;
-let isRunning = false;
+// Persistent Storage (Simple JSON file)
+const DB_FILE = path.join(__dirname, 'db.json');
+let rooms = new Map();
 
-io.on('connection', (socket) => {
-  // Sync state for newly connected phones
-  socket.emit('timer_state', { isRunning, startTime });
-  
-  // Broadcast connected count to everyone
-  io.emit('connected_count', io.engine.clientsCount);
+if (fs.existsSync(DB_FILE)) {
+  try {
+    const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+    rooms = new Map(Object.entries(data));
+  } catch (e) {
+    console.error("Could not load DB");
+  }
+}
 
-  // START
-  socket.on('start_timer', () => {
-    if (!isRunning) {
-      startTime = Date.now();
-      isRunning = true;
-      io.emit('timer_started', startTime);
-    }
+const saveDB = () => {
+  fs.writeFileSync(DB_FILE, JSON.stringify(Object.fromEntries(rooms)));
+};
+
+io.on('connection', socket => {
+  // 1. Latency Synchronization (Ping/Pong)
+  socket.on('sync_ping', (clientTime) => {
+    socket.emit('sync_pong', { clientTime, serverTime: Date.now() });
   });
 
-  // STOP
-  socket.on('stop_timer', () => {
-    if (isRunning) {
-      const dur = Date.now() - startTime;
-      isRunning = false;
-      io.emit('timer_stopped', dur);
-    }
+  // 2. Rooms Integration
+  const roomId = socket.handshake.query.room || 'main';
+  socket.join(roomId);
+
+  if (!rooms.has(roomId)) {
+    rooms.set(roomId, {
+      host: socket.id,
+      isRunning: false,
+      startTime: null,
+      elapsed: 0,
+      laps: [],
+      mode: 'stopwatch',
+      countdownDuration: 60000 // 1 minute default
+    });
+    saveDB();
+  }
+
+  const room = rooms.get(roomId);
+
+  // 3. Role-Based Permissions (Assign host if room is empty)
+  if (!room.host || !io.sockets.sockets.get(room.host)) {
+    room.host = socket.id;
+    saveDB();
+  }
+
+  const broadcast = () => {
+    const clientsCount = io.sockets.adapter.rooms.get(roomId)?.size || 0;
+    io.to(roomId).emit('sync_state', { ...room, clientsCount });
+    saveDB();
+  };
+
+  broadcast();
+
+  socket.on('start', () => {
+    if (socket.id !== room.host || room.isRunning) return;
+    room.startTime = Date.now() - room.elapsed;
+    room.isRunning = true;
+    io.to(roomId).emit('audio_cue', 'start');
+    broadcast();
   });
 
-  // RESET
-  socket.on('reset_timer', () => {
-    startTime = null;
-    isRunning = false;
-    io.emit('timer_reset');
+  socket.on('stop', () => {
+    if (socket.id !== room.host || !room.isRunning) return;
+    room.elapsed = Date.now() - room.startTime;
+    room.isRunning = false;
+    io.to(roomId).emit('audio_cue', 'stop');
+    broadcast();
   });
 
-  // DISCONNECT
+  socket.on('lap', () => {
+    if (socket.id !== room.host || !room.isRunning) return;
+    const current = Date.now() - room.startTime;
+    room.laps.push(current);
+    io.to(roomId).emit('audio_cue', 'lap');
+    broadcast();
+  });
+
+  socket.on('reset', () => {
+    if (socket.id !== room.host) return;
+    room.startTime = null;
+    room.isRunning = false;
+    room.elapsed = 0;
+    room.laps = [];
+    io.to(roomId).emit('audio_cue', 'reset');
+    broadcast();
+  });
+
+  socket.on('set_mode', (data) => {
+    if (socket.id !== room.host) return;
+    room.mode = data.mode;
+    if (data.duration) room.countdownDuration = data.duration;
+    room.startTime = null;
+    room.isRunning = false;
+    room.elapsed = 0;
+    room.laps = [];
+    broadcast();
+  });
+
   socket.on('disconnect', () => {
-    io.emit('connected_count', io.engine.clientsCount);
+    const clients = io.sockets.adapter.rooms.get(roomId);
+    if (room.host === socket.id && clients && clients.size > 0) {
+      room.host = [...clients][0]; // Pass host to the next user in line
+    }
+    broadcast();
   });
 });
 
