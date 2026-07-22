@@ -22,51 +22,54 @@
       --blue: #3b82f6; --blue-bg: rgba(59, 130, 246, 0.1); --blue-border: rgba(59, 130, 246, 0.4);
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    /* Prevent body scrolling so our slider handles it */
     body {
-      min-height: 100dvh; background: var(--bg); color: var(--text);
+      height: 100dvh; background: var(--bg); color: var(--text);
       font-family: ui-monospace, 'Cascadia Code', 'SF Mono', 'Roboto Mono', Menlo, monospace;
-      display: flex; flex-direction: column; align-items: center;
-      position: relative; overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column; overflow: hidden;
       transition: background 0.4s ease, color 0.4s ease;
     }
 
     /* --- TOP HEADER --- */
-    #top-bar-container { width: 100%; max-width: 1000px; padding: 24px; z-index: 10; display: flex; flex-direction: column; gap: 12px; }
-    #top-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    #top-bar-container { width: 100%; padding: 20px 24px; z-index: 10; display: flex; flex-direction: column; align-items: center; }
+    #top-bar { display: flex; justify-content: center; align-items: center; gap: 8px; }
     .room-badge { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); padding: 8px 12px 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
     .role-host { color: var(--green); }
     .role-viewer { color: var(--text-muted); }
     .sep { color: var(--border); margin: 0 2px; }
-    
-    #about-display { font-size: 12px; color: var(--text-muted); padding: 0 16px; display: none; }
+    #about-display { font-size: 12px; color: var(--text-muted); padding-top: 10px; display: none; text-align: center; }
 
     #btn-share { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; border-radius: 100px; cursor: pointer; font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
     #btn-share:hover { background: var(--surface-hover); border-color: var(--text-muted); }
 
-    .toggles { display: flex; flex-direction: row; gap: 8px; align-items: center; }
-    .toggles button { background: var(--surface); border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .toggles button:hover { background: var(--surface-hover); transform: translateY(-2px); }
+    /* --- SLIDER LAYOUT (Pages) --- */
+    #viewport { flex: 1; width: 100vw; overflow: hidden; position: relative; }
+    #swipe-wrapper { display: flex; width: 400vw; height: 100%; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+    .page { width: 100vw; height: 100%; overflow-y: auto; padding: 0 24px 80px 24px; display: flex; flex-direction: column; align-items: center; }
+    
+    .page-header { font-size: 24px; font-weight: 700; margin-bottom: 24px; width: 100%; max-width: 640px; }
+    .page-content-wrapper { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 20px; }
 
-    @media (max-width: 480px) {
-      #top-bar-container { padding: 16px 12px; }
-      .room-badge { padding: 6px 10px; font-size: 11px; gap: 6px; }
-      #btn-share { padding: 4px 6px; font-size: 10px; }
-      .toggles button { width: 34px; height: 34px; font-size: 14px; }
-      #btn-share span { display: none; }
-    }
+    /* --- BOTTOM NAV --- */
+    #bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+    .nav-item { background: transparent; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: 0.2s; width: 25%; padding: 10px 0; }
+    .nav-item svg { width: 24px; height: 24px; transition: transform 0.2s; }
+    .nav-item:hover, .nav-item.active { color: var(--text); }
+    .nav-item.active svg { transform: translateY(-3px); stroke: var(--blue); }
 
     /* --- TIMER DISPLAY --- */
-    .timer-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; padding: 20px; z-index: 10; }
+    .timer-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; padding: 20px 0; min-height: 35vh; }
     #timer { font-size: clamp(4rem, 15vw, 10rem); font-weight: 700; line-height: 1; display: flex; align-items: baseline; justify-content: center; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; text-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     #timer .colon { color: var(--text-muted); margin: 0 4px; animation: pulse 2s infinite; }
     .frac { font-size: clamp(1.5rem, 5vw, 3.5rem); color: var(--text-muted); margin-left: 8px; font-weight: 500; }
 
     /* --- CONTROLS --- */
-    #controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; width: 100%; max-width: 640px; padding: 0 24px; z-index: 10; margin-bottom: 40px; }
-    .ctrl-btn { flex: 1 1 calc(33% - 16px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 0; border-radius: 24px; border: 1.5px solid var(--border); font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: var(--surface); color: var(--text-muted); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-    @media (min-width: 768px) { .ctrl-btn { flex: 1 1 0; padding: 32px 0; } }
-    .ctrl-btn svg { width: 28px; height: 28px; transition: transform 0.2s; }
+    #controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; width: 100%; margin-bottom: 30px; }
+    .ctrl-btn { flex: 1 1 calc(33% - 16px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 0; border-radius: 20px; border: 1.5px solid var(--border); font-family: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: all 0.25s; background: var(--surface); color: var(--text-muted); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    @media (min-width: 480px) { .ctrl-btn { flex: 1 1 0; padding: 24px 0; } }
+    .ctrl-btn svg { width: 24px; height: 24px; transition: transform 0.2s; }
     .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none; }
     .ctrl-btn:not(:disabled):active { transform: scale(0.95); }
     #btn-start { border-color: var(--green-border); color: var(--green); background: var(--green-bg); }
@@ -76,9 +79,11 @@
     #btn-lap { border-color: var(--blue-border); color: var(--blue); }
     #btn-lap:not(:disabled):hover { background: var(--blue); color: var(--bg); transform: translateY(-4px); box-shadow: 0 10px 25px var(--blue-bg); }
     #btn-reset:not(:disabled):hover { background: var(--text); color: var(--bg); transform: translateY(-4px); }
+    #btn-save-run { border-color: var(--text-muted); color: var(--text); }
+    #btn-save-run:not(:disabled):hover { background: var(--text); color: var(--bg); transform: translateY(-4px); }
 
     /* --- LAPS --- */
-    #laps { width: 100%; max-width: 640px; padding: 0 24px 60px; list-style: none; display: flex; flex-direction: column-reverse; z-index: 10; }
+    #laps { width: 100%; list-style: none; display: flex; flex-direction: column-reverse; margin-bottom: 20px; }
     #laps li { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-variant-numeric: tabular-nums; }
     #laps li .lap-num { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; }
     #laps li .lap-split { color: var(--text-muted); font-weight: 500; }
@@ -86,16 +91,8 @@
     #laps li.fastest .lap-split, #laps li.fastest .lap-tot { color: var(--green); }
     #laps li.slowest .lap-split, #laps li.slowest .lap-tot { color: var(--red); }
 
-    /* --- MODALS --- */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: all 0.3s ease; }
-    .modal-overlay.show { opacity: 1; pointer-events: all; }
-    .modal-content { background: var(--surface); border: 1px solid var(--border); width: min(90%, 400px); padding: 32px; border-radius: 24px; display: flex; flex-direction: column; gap: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .modal-overlay.show .modal-content { transform: translateY(0) scale(1); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; }
-    .modal-header h2 { font-size: 20px; font-weight: 700; }
-    .btn-close { background: var(--bg); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .btn-close:hover { background: var(--text); color: var(--bg); }
-    .setting-group { display: flex; flex-direction: column; gap: 10px; }
+    /* --- SETTINGS / FORMS --- */
+    .setting-group { display: flex; flex-direction: column; gap: 8px; width: 100%; }
     .setting-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
     .setting-group select, .setting-group input { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; width: 100%; outline: none; cursor: pointer; }
     .setting-group select:focus, .setting-group input:focus { border-color: var(--blue); }
@@ -103,22 +100,23 @@
     .cd-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 18px; width: 44px; height: 44px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
     .cd-btn:hover { background: var(--text); color: var(--bg); }
     #cd-display { font-size: 16px; font-weight: 700; }
-    
-    .btn-primary { background: var(--green); color: var(--bg); border: none; padding: 16px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+    .btn-primary { background: var(--green); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; }
     .btn-primary:hover { background: #10b981; transform: translateY(-2px); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
+    .btn-secondary:hover { background: var(--text); color: var(--bg); }
 
-    #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
-
-    /* --- HISTORY SPECIFIC STYLES --- */
-    #btn-save-run { border-color: var(--text-muted); color: var(--text); }
-    #btn-save-run:not(:disabled):hover { background: var(--text); color: var(--bg); transform: translateY(-4px); }
-    .history-item { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 6px; }
+    /* --- HISTORY ITEMS --- */
+    .history-item { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 6px; }
     .history-item-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
     .history-item-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
     .history-item-laps { font-size: 13px; color: var(--text-muted); }
+
+    #glow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; border-radius: 50%; filter: blur(150px); opacity: 0.08; pointer-events: none; transition: background 1s ease; z-index: 0; }
   </style>
 </head>
 <body>
+
+<div id="glow"></div>
 
 <div id="top-bar-container">
   <div id="top-bar">
@@ -133,150 +131,151 @@
         <span>Copy</span>
       </button>
     </div>
-    
-    <div class="toggles">
-      <!-- Create Room Button -->
-      <button id="btn-open-create" title="Create New Private Room">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-      </button>
-      <button id="btn-audio" title="Toggle Audio">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>
-      </button>
-      <button id="btn-theme" title="Toggle Theme">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-      </button>
-      <button id="btn-settings" title="Settings" style="display:none;">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-      </button>
-      <button id="btn-history" title="View History">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-      </button>
-    </div>
   </div>
   <div id="about-display"></div>
 </div>
 
-<!-- Settings Modal -->
-<div id="settings-modal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Room Settings</h2>
-      <button class="btn-close" id="btn-close-settings"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+<div id="viewport">
+  <div id="swipe-wrapper">
+    
+    <!-- PAGE 0: HISTORY -->
+    <div class="page" id="page-history">
+      <h2 class="page-header">History</h2>
+      <div class="page-content-wrapper">
+        <div class="setting-group">
+          <label>Save Destination</label>
+          <select id="storage-select">
+            <option value="local">Local Device (Browser)</option>
+            <option value="cloud">Cloud Storage</option>
+          </select>
+        </div>
+        
+        <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
+          ⚠️ <strong>Warning:</strong> Local data is saved only on this browser.
+        </p>
+        <div class="setting-group" id="cloud-id-group" style="display: none;">
+          <label>Cloud Sync ID</label>
+          <input type="text" id="cloud-sync-id" autocomplete="off">
+          <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button id="btn-export" class="btn-primary" style="background: var(--blue);">Export JSON</button>
+          <button id="btn-import-trigger" class="btn-primary" style="background: var(--text-muted);">Import JSON</button>
+          <input type="file" id="file-import" accept=".json" style="display: none;">
+        </div>
+
+        <div class="setting-group" style="margin-top: 10px;">
+          <label>Saved Runs</label>
+          <ul id="history-list" style="list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0;"></ul>
+        </div>
+        <button id="btn-clear-history" class="btn-primary" style="background: var(--red); margin-top: 20px;">Clear All History</button>
+      </div>
     </div>
-    <div class="setting-group" id="perm-group">
-      <label>Permissions</label>
-      <select id="perm-select">
-        <option value="host_only">Host Only (Just Me)</option>
-        <option value="anyone">Everyone (Co-Hosts)</option>
-      </select>
+
+    <!-- PAGE 1: TIMER (Home) -->
+    <div class="page" id="page-timer">
+      <div class="page-content-wrapper" style="height: 100%;">
+        <div class="timer-container">
+          <div id="timer">
+            <span id="hh">00</span><span class="colon" id="h-colon">:</span>
+            <span id="mm">00</span><span class="colon">:</span>
+            <span id="ss">00</span>
+            <span class="frac">.<span id="ms">000</span></span>
+          </div>
+        </div>
+
+        <div id="controls">
+          <button class="ctrl-btn" id="btn-start" disabled><svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>START</button>
+          <button class="ctrl-btn" id="btn-stop" disabled><svg fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>STOP</button>
+          <button class="ctrl-btn" id="btn-lap" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v19"/></svg>LAP</button>
+          <button class="ctrl-btn" id="btn-reset" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>RESET</button>
+          <button class="ctrl-btn" id="btn-save-run" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>SAVE</button>
+        </div>
+
+        <ul id="laps"></ul>
+      </div>
     </div>
-    <div class="setting-group">
-      <label>Timer Mode</label>
-      <select id="mode-select">
-        <option value="stopwatch">Stopwatch (Count Up)</option>
-        <option value="countdown">Countdown (Count Down)</option>
-      </select>
+
+    <!-- PAGE 2: CREATE ROOM -->
+    <div class="page" id="page-create">
+      <h2 class="page-header">Create Room</h2>
+      <div class="page-content-wrapper">
+        <div class="setting-group">
+          <label>Room Name (Required)</label>
+          <input type="text" id="input-room-name" placeholder="e.g. Morning Workout" required autocomplete="off">
+        </div>
+        <div class="setting-group">
+          <label>About Room (Optional)</label>
+          <input type="text" id="input-room-about" placeholder="e.g. 5K Sprint Training" autocomplete="off">
+        </div>
+        <button id="btn-submit-room" class="btn-primary" style="margin-top: 10px;">Create & Join</button>
+      </div>
     </div>
-    <div class="setting-group" id="countdown-settings" style="display:none;">
-      <label>Start From</label>
-      <div id="countdown-wrap">
-        <button class="cd-btn" id="cd-minus">-</button>
-        <span id="cd-display">1 min</span>
-        <button class="cd-btn" id="cd-plus">+</button>
+
+    <!-- PAGE 3: SETTINGS -->
+    <div class="page" id="page-settings">
+      <h2 class="page-header">Settings</h2>
+      <div class="page-content-wrapper">
+        <div class="setting-group" id="perm-group" style="display:none;">
+          <label>Permissions (Host Only)</label>
+          <select id="perm-select">
+            <option value="host_only">Host Only (Just Me)</option>
+            <option value="anyone">Everyone (Co-Hosts)</option>
+          </select>
+        </div>
+        <div class="setting-group" id="timer-settings-group" style="display:none;">
+          <label>Timer Mode</label>
+          <select id="mode-select">
+            <option value="stopwatch">Stopwatch (Count Up)</option>
+            <option value="countdown">Countdown (Count Down)</option>
+          </select>
+        </div>
+        <div class="setting-group" id="countdown-settings" style="display:none;">
+          <label>Start From</label>
+          <div id="countdown-wrap">
+            <button class="cd-btn" id="cd-minus">-</button>
+            <span id="cd-display">1 min</span>
+            <button class="cd-btn" id="cd-plus">+</button>
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
+        
+        <div class="setting-group">
+          <label>App Preferences</label>
+          <button id="btn-theme" class="btn-secondary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            Toggle Light/Dark Theme
+          </button>
+          <button id="btn-audio" class="btn-secondary">
+            <span id="audio-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg></span>
+            Toggle Audio Tones
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Create Room Modal -->
-<div id="create-modal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Create Private Room</h2>
-      <button class="btn-close" id="btn-close-create"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-    </div>
-    <div class="setting-group">
-      <label>Room Name (Required)</label>
-      <input type="text" id="input-room-name" placeholder="e.g. Morning Workout" required autocomplete="off">
-    </div>
-    <div class="setting-group">
-      <label>About Room (Optional)</label>
-      <input type="text" id="input-room-about" placeholder="e.g. 5K Sprint Training" autocomplete="off">
-    </div>
-    <button id="btn-submit-room" class="btn-primary">Create & Join</button>
-  </div>
-</div>
-
-<!-- History Modal -->
-<div id="history-modal" class="modal-overlay">
-  <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
-    <div class="modal-header">
-      <h2>Timer History</h2>
-      <button class="btn-close" id="btn-close-history">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-      </button>
-    </div>
-
-    <!-- Storage Preferences -->
-    <div class="setting-group">
-      <label>Save Destination</label>
-      <select id="storage-select">
-        <option value="local">Local Device (Browser)</option>
-        <option value="cloud">Cloud Storage</option>
-      </select>
-    </div>
-    
-    <!-- Dynamic Warnings & Cloud ID -->
-    <p id="local-warning" style="font-size: 12px; color: var(--red); display: none;">
-      ⚠️ <strong>Warning:</strong> Local data is saved only on this browser. If you clear your browser data or delete the app, your history will be permanently lost.
-    </p>
-    <div class="setting-group" id="cloud-id-group" style="display: none;">
-      <label>Your Cloud Sync ID (Save this to sync across devices)</label>
-      <input type="text" id="cloud-sync-id" autocomplete="off">
-      <button id="btn-fetch-cloud" class="btn-primary" style="padding: 10px;">Fetch Cloud Data</button>
-    </div>
-
-    <!-- Import / Export Controls -->
-    <div style="display: flex; gap: 10px; margin-top: 10px;">
-      <button id="btn-export" class="btn-primary" style="flex: 1; padding: 10px; background: var(--blue);">Export JSON</button>
-      <button id="btn-import-trigger" class="btn-primary" style="flex: 1; padding: 10px; background: var(--text-muted);">Import JSON</button>
-      <input type="file" id="file-import" accept=".json" style="display: none;">
-    </div>
-
-    <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
-
-    <!-- History List -->
-    <div class="setting-group">
-      <label>Saved Runs</label>
-      <ul id="history-list" style="list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding: 0;">
-        <!-- History items injected via JS -->
-      </ul>
-    </div>
-    
-    <button id="btn-clear-history" class="btn-primary" style="background: var(--red); padding: 10px;">Clear All History</button>
-  </div>
-</div>
-
-<div class="timer-container">
-  <div id="timer">
-    <span id="hh">00</span><span class="colon" id="h-colon">:</span>
-    <span id="mm">00</span><span class="colon">:</span>
-    <span id="ss">00</span>
-    <span class="frac">.<span id="ms">000</span></span>
-  </div>
-</div>
-
-<div id="controls">
-  <button class="ctrl-btn" id="btn-start" disabled><svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>START</button>
-  <button class="ctrl-btn" id="btn-stop" disabled><svg fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>STOP</button>
-  <button class="ctrl-btn" id="btn-lap" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v19"/></svg>LAP</button>
-  <button class="ctrl-btn" id="btn-reset" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>RESET</button>
-  <!-- NEW SAVE BUTTON -->
-  <button class="ctrl-btn" id="btn-save-run" disabled><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>SAVE</button>
-</div>
-
-<ul id="laps"></ul>
-<div id="glow"></div>
+<nav id="bottom-nav">
+  <button class="nav-item" onclick="goToPage(0)">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    History
+  </button>
+  <button class="nav-item active" onclick="goToPage(1)">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    Timer
+  </button>
+  <button class="nav-item" onclick="goToPage(2)">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+    Create
+  </button>
+  <button class="nav-item" onclick="goToPage(3)">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    Settings
+  </button>
+</nav>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -286,10 +285,8 @@
   const roomName = urlParams.get('room') || 'main';
   const aboutQuery = urlParams.get('about') || '';
   
-  // Clean up display name (replace hyphens with spaces for visual)
   document.getElementById('room-display').textContent = roomName.replace(/-/g, ' ');
 
-  // Pass 'about' back to server if it exists in URL
   const socket = io({ query: { room: roomName, about: aboutQuery } });
   
   let state = {};
@@ -312,50 +309,58 @@
   const $reset = document.getElementById('btn-reset');
   const $btnSaveRun = document.getElementById('btn-save-run');
   
-  const $settingsModal = document.getElementById('settings-modal');
-  const $btnSettings = document.getElementById('btn-settings');
-  const $btnCloseSettings = document.getElementById('btn-close-settings');
+  const $permGroup = document.getElementById('perm-group');
+  const $timerSettingsGroup = document.getElementById('timer-settings-group');
   const $permSelect = document.getElementById('perm-select');
   const $modeSelect = document.getElementById('mode-select');
   const $cdSettings = document.getElementById('countdown-settings');
   const $cdDisplay = document.getElementById('cd-display');
   
-  const $createModal = document.getElementById('create-modal');
-  const $btnOpenCreate = document.getElementById('btn-open-create');
-  const $btnCloseCreate = document.getElementById('btn-close-create');
   const $btnSubmitRoom = document.getElementById('btn-submit-room');
   const $inputRoomName = document.getElementById('input-room-name');
   const $inputRoomAbout = document.getElementById('input-room-about');
   
   let cdVal = 1; 
 
-  // Modal Listeners
-  $btnSettings.onclick = () => $settingsModal.classList.add('show');
-  $btnCloseSettings.onclick = () => $settingsModal.classList.remove('show');
-  
-  $btnOpenCreate.onclick = () => { $createModal.classList.add('show'); $inputRoomName.focus(); };
-  $btnCloseCreate.onclick = () => $createModal.classList.remove('show');
-  
-  // Close modals when clicking outside
-  document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
-  });
+  // --- SWIPE / SLIDER LOGIC ---
+  const $swipeWrapper = document.getElementById('swipe-wrapper');
+  const navItems = document.querySelectorAll('.nav-item');
+  let currentPage = 1; // Start on Timer
+  let startX = 0;
+  let endX = 0;
 
+  function goToPage(index) {
+    currentPage = index;
+    $swipeWrapper.style.transform = `translateX(-${index * 100}vw)`;
+    navItems.forEach((btn, i) => btn.classList.toggle('active', i === index));
+    if(index === 2) setTimeout(() => $inputRoomName.focus(), 300);
+  }
+  
+  // Set initial view to Timer
+  goToPage(1); 
+
+  $swipeWrapper.addEventListener('touchstart', (e) => {
+    startX = e.changedTouches[0].screenX;
+  }, {passive: true});
+
+  $swipeWrapper.addEventListener('touchend', (e) => {
+    endX = e.changedTouches[0].screenX;
+    if (startX - endX > 50 && currentPage < 3) goToPage(currentPage + 1); // Swipe Left
+    if (endX - startX > 50 && currentPage > 0) goToPage(currentPage - 1); // Swipe Right
+  }, {passive: true});
+
+
+  // --- APP LOGIC ---
   $btnSubmitRoom.onclick = () => {
-    // Replaces all spaces with hyphens so URLs are clean (e.g. ?room=My-Cool-Room)
     const rawName = $inputRoomName.value.trim();
     const cleanName = rawName.replace(/\s+/g, '-'); 
     const aboutText = $inputRoomAbout.value.trim();
-    
     if (!cleanName) return alert("Please enter a Room Name.");
-    
     let newUrl = `?room=${encodeURIComponent(cleanName)}`;
     if (aboutText) newUrl += `&about=${encodeURIComponent(aboutText)}`;
-    
     window.location.href = newUrl;
   };
 
-  // Allow pressing Enter key to submit room
   $inputRoomName.addEventListener("keypress", (e) => { if (e.key === "Enter") $btnSubmitRoom.click(); });
   $inputRoomAbout.addEventListener("keypress", (e) => { if (e.key === "Enter") $btnSubmitRoom.click(); });
 
@@ -363,16 +368,19 @@
   const audioCtx = new AudioContext();
   let audioEnabled = true;
 
-  document.getElementById('btn-audio').onclick = (e) => {
+  document.getElementById('btn-audio').onclick = () => {
     audioEnabled = !audioEnabled;
-    const btn = e.currentTarget;
+    const iconSpan = document.getElementById('audio-icon');
     if (audioEnabled) {
-        btn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>`;
-        btn.style.opacity = "1";
+        iconSpan.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8.5 8.5 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path></svg>`;
     } else {
-        btn.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>`;
-        btn.style.opacity = "0.5";
+        iconSpan.innerHTML = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>`;
     }
+  };
+
+  document.getElementById('btn-theme').onclick = () => {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   };
 
   function playTone(type) {
@@ -484,8 +492,9 @@
         $aboutDisplay.style.display = 'none';
     }
 
-    $btnSettings.style.display = canControl ? 'flex' : 'none';
-    document.getElementById('perm-group').style.display = isHost ? 'flex' : 'none';
+    // Toggle setting blocks based on permission
+    $permGroup.style.display = isHost ? 'flex' : 'none';
+    $timerSettingsGroup.style.display = canControl ? 'flex' : 'none';
     $permSelect.value = state.permission;
 
     if (canControl) {
@@ -504,7 +513,7 @@
     $modeSelect.value = state.mode;
     cdVal = state.countdownDuration / 60000;
     $cdDisplay.textContent = cdVal + ' min';
-    $cdSettings.style.display = state.mode === 'countdown' ? 'flex' : 'none';
+    $cdSettings.style.display = (state.mode === 'countdown' && canControl) ? 'flex' : 'none';
 
     renderLaps(state.laps);
     if (raf) cancelAnimationFrame(raf);
@@ -537,21 +546,14 @@
     if(cdVal < 60) { cdVal++; socket.emit('set_mode', { mode: 'countdown', duration: cdVal * 60000 }); }
   };
 
-  document.getElementById('btn-theme').onclick = () => {
-    const root = document.documentElement;
-    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  };
-
   // --- HISTORY LOGIC ---
   let historyData = [];
   let storageMode = localStorage.getItem('storageMode') || 'local';
   let cloudSyncKey = localStorage.getItem('cloudSyncKey') || Math.random().toString(36).substr(2, 9).toUpperCase();
+  let lastSavedElapsed = -1; // NEW: Track the last saved state to prevent duplicates
   
   localStorage.setItem('cloudSyncKey', cloudSyncKey);
   
-  const $historyModal = document.getElementById('history-modal');
-  const $btnHistory = document.getElementById('btn-history');
-  const $btnCloseHistory = document.getElementById('btn-close-history');
   const $storageSelect = document.getElementById('storage-select');
   const $localWarning = document.getElementById('local-warning');
   const $cloudIdGroup = document.getElementById('cloud-id-group');
@@ -561,6 +563,7 @@
   
   $cloudSyncId.value = cloudSyncKey;
   $storageSelect.value = storageMode;
+  updateStorageUI();
 
   function updateStorageUI() {
     if (storageMode === 'local') {
@@ -586,12 +589,6 @@
     socket.emit('get_cloud_history', cloudSyncKey);
   };
 
-  $btnHistory.onclick = () => {
-    $historyModal.classList.add('show');
-    updateStorageUI();
-  };
-  $btnCloseHistory.onclick = () => $historyModal.classList.remove('show');
-
   function loadLocalHistory() {
     try {
       historyData = JSON.parse(localStorage.getItem('timerHistory')) || [];
@@ -615,13 +612,19 @@
   }
 
   $btnSaveRun.onclick = () => {
-    if (state.elapsed === 0) return;
+    // Prevent saving if it's already saved or timer is at 0
+    if (state.elapsed === 0 || state.elapsed === lastSavedElapsed) return;
+    
     const t = formatTime(state.elapsed);
     const timeString = `${t.h !== '00' ? t.h + ':' : ''}${t.m}:${t.s}.${t.msec}`;
     
+    // NEW: Format date with 12-hour AM/PM format
+    const timeFormatOpts = { hour: 'numeric', minute: '2-digit', hour12: true };
+    const dateFormatted = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString('en-US', timeFormatOpts);
+    
     const newRecord = {
       id: Date.now(),
-      date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+      date: dateFormatted,
       room: roomName,
       time: timeString,
       mode: state.mode,
@@ -630,6 +633,8 @@
     
     historyData.unshift(newRecord); 
     persistHistory();
+    
+    lastSavedElapsed = state.elapsed; // Update the tracking variable
     
     const originalText = $btnSaveRun.innerHTML;
     $btnSaveRun.innerHTML = 'SAVED!';
