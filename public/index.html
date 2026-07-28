@@ -719,7 +719,10 @@
   function loadLocalHistory() {
     try {
       historyData = JSON.parse(localStorage.getItem('timerHistory')) || [];
-    } catch(e) { historyData = []; }
+    } catch(e) {
+      console.error('Error parsing local history:', e);
+      historyData = [];
+    }
     renderHistoryUI();
   }
 
