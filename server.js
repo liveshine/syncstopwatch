@@ -16,7 +16,15 @@ let rooms = new Map();
 if (fs.existsSync(DB_FILE)) {
   try { rooms = new Map(Object.entries(JSON.parse(fs.readFileSync(DB_FILE, 'utf-8')))); } catch (e) { console.error('Error reading db.json:', e); }
 }
-const saveDB = () => fs.writeFileSync(DB_FILE, JSON.stringify(Object.fromEntries(rooms)));
+let dbTimeout = null;
+const saveDB = () => {
+  if (dbTimeout) clearTimeout(dbTimeout);
+  dbTimeout = setTimeout(() => {
+    fs.writeFile(DB_FILE, JSON.stringify(Object.fromEntries(rooms)), err => {
+      if (err) console.error('Error saving DB:', err);
+    });
+  }, 500);
+};
 
 // NEW: Persistent Storage for User History (Cloud)
 const HISTORY_FILE = path.join(__dirname, 'history.json');
@@ -24,7 +32,15 @@ let userHistory = new Map();
 if (fs.existsSync(HISTORY_FILE)) {
   try { userHistory = new Map(Object.entries(JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8')))); } catch (e) { console.error('Error reading history.json:', e); }
 }
-const saveHistoryDB = () => fs.writeFileSync(HISTORY_FILE, JSON.stringify(Object.fromEntries(userHistory)));
+let historyTimeout = null;
+const saveHistoryDB = () => {
+  if (historyTimeout) clearTimeout(historyTimeout);
+  historyTimeout = setTimeout(() => {
+    fs.writeFile(HISTORY_FILE, JSON.stringify(Object.fromEntries(userHistory)), err => {
+      if (err) console.error('Error saving History DB:', err);
+    });
+  }, 500);
+};
 
 
 io.on('connection', socket => {
@@ -43,8 +59,8 @@ io.on('connection', socket => {
   });
   // ---------------------------------
 
-  const roomId = socket.handshake.query.room || 'main';
-  const aboutText = socket.handshake.query.about || ''; 
+  const roomId = String(socket.handshake.query.room || 'main').slice(0, 100);
+  const aboutText = String(socket.handshake.query.about || '').slice(0, 500);
   
   socket.join(roomId);
 
@@ -127,4 +143,4 @@ io.on('connection', socket => {
 });
 
 const port = process.env.PORT || 3000;
-server.listen(port, () => console.log(`Listening on port ${port}`));
+server.listen(port);
