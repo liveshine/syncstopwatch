@@ -14,7 +14,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DB_FILE = path.join(__dirname, 'db.json');
 let rooms = new Map();
 if (fs.existsSync(DB_FILE)) {
-  try { rooms = new Map(Object.entries(JSON.parse(fs.readFileSync(DB_FILE, 'utf-8')))); } catch (e) { }
+  try {
+    rooms = new Map(Object.entries(JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'))));
+  } catch (e) {
+    console.error('Error reading db.json:', e);
+  }
 }
 const saveDB = () => fs.writeFileSync(DB_FILE, JSON.stringify(Object.fromEntries(rooms)));
 
@@ -22,7 +26,11 @@ const saveDB = () => fs.writeFileSync(DB_FILE, JSON.stringify(Object.fromEntries
 const HISTORY_FILE = path.join(__dirname, 'history.json');
 let userHistory = new Map();
 if (fs.existsSync(HISTORY_FILE)) {
-  try { userHistory = new Map(Object.entries(JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8')))); } catch (e) { }
+  try {
+    userHistory = new Map(Object.entries(JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8'))));
+  } catch (e) {
+    console.error('Error reading history.json:', e);
+  }
 }
 const saveHistoryDB = () => fs.writeFileSync(HISTORY_FILE, JSON.stringify(Object.fromEntries(userHistory)));
 
