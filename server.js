@@ -43,8 +43,8 @@ io.on('connection', socket => {
   });
   // ---------------------------------
 
-  const roomId = socket.handshake.query.room || 'main';
-  const aboutText = socket.handshake.query.about || ''; 
+  const roomId = String(socket.handshake.query.room || 'main').slice(0, 100);
+  const aboutText = String(socket.handshake.query.about || '').slice(0, 500);
   
   socket.join(roomId);
 
