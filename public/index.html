@@ -790,7 +790,7 @@
 
       const timeDiv = document.createElement('div');
       timeDiv.className = 'history-item-time';
-      timeDiv.textContent = `${item.time} ${item.mode === 'countdown' ? '(Timer)' : ''}`.trim();
+      timeDiv.textContent = `${item.time} ${item.mode === 'countdown' ? '(Timer)' : ''}`;
 
       li.appendChild(headerDiv);
       li.appendChild(timeDiv);
