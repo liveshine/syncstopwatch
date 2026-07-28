@@ -16,7 +16,16 @@ let rooms = new Map();
 if (fs.existsSync(DB_FILE)) {
   try { rooms = new Map(Object.entries(JSON.parse(fs.readFileSync(DB_FILE, 'utf-8')))); } catch (e) { }
 }
-const saveDB = () => fs.writeFileSync(DB_FILE, JSON.stringify(Object.fromEntries(rooms)));
+let isWritingDB = false;
+let pendingDBWrite = false;
+const saveDB = () => {
+  if (isWritingDB) { pendingDBWrite = true; return; }
+  isWritingDB = true; pendingDBWrite = false;
+  fs.writeFile(DB_FILE, JSON.stringify(Object.fromEntries(rooms)), () => {
+    isWritingDB = false;
+    if (pendingDBWrite) saveDB();
+  });
+};
 
 // NEW: Persistent Storage for User History (Cloud)
 const HISTORY_FILE = path.join(__dirname, 'history.json');
@@ -24,7 +33,16 @@ let userHistory = new Map();
 if (fs.existsSync(HISTORY_FILE)) {
   try { userHistory = new Map(Object.entries(JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8')))); } catch (e) { }
 }
-const saveHistoryDB = () => fs.writeFileSync(HISTORY_FILE, JSON.stringify(Object.fromEntries(userHistory)));
+let isWritingHistory = false;
+let pendingHistoryWrite = false;
+const saveHistoryDB = () => {
+  if (isWritingHistory) { pendingHistoryWrite = true; return; }
+  isWritingHistory = true; pendingHistoryWrite = false;
+  fs.writeFile(HISTORY_FILE, JSON.stringify(Object.fromEntries(userHistory)), () => {
+    isWritingHistory = false;
+    if (pendingHistoryWrite) saveHistoryDB();
+  });
+};
 
 
 io.on('connection', socket => {
