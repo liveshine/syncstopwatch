@@ -548,15 +548,30 @@
     return { h, m, s, msec };
   }
 
+  let lastH = null, lastM = null, lastS = null, lastMsec = null;
   function display(ms) {
     const t = formatTime(ms);
-    if (t.h === '00') {
-      $hh.style.display = 'none'; $hColon.style.display = 'none';
-    } else {
-      $hh.style.display = 'inline'; $hColon.style.display = 'inline';
+    if (t.h !== lastH) {
+      if (t.h === '00') {
+        $hh.style.display = 'none'; $hColon.style.display = 'none';
+      } else {
+        $hh.style.display = 'inline'; $hColon.style.display = 'inline';
+      }
+      $hh.textContent = t.h;
+      lastH = t.h;
     }
-    $hh.textContent = t.h; $mm.textContent = t.m;
-    $ss.textContent = t.s; $ms.textContent = t.msec;
+    if (t.m !== lastM) {
+      $mm.textContent = t.m;
+      lastM = t.m;
+    }
+    if (t.s !== lastS) {
+      $ss.textContent = t.s;
+      lastS = t.s;
+    }
+    if (t.msec !== lastMsec) {
+      $ms.textContent = t.msec;
+      lastMsec = t.msec;
+    }
   }
 
   function renderLaps(lapsArr) {
