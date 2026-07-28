@@ -38,6 +38,16 @@ io.on('connection', socket => {
   });
 
   socket.on('save_cloud_history', ({ syncKey, data }) => {
+    if (!Array.isArray(data)) return;
+    if (data.length > 1000) return; // Limit number of items
+
+    try {
+      const dataStr = JSON.stringify(data);
+      if (dataStr.length > 50000) return; // Limit payload size (~50KB)
+    } catch (e) {
+      return; // Stop if it's circular or can't be stringified
+    }
+
     userHistory.set(syncKey, data);
     saveHistoryDB();
   });
