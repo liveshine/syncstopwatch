@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
@@ -32,13 +33,55 @@ io.on('connection', socket => {
   socket.on('sync_ping', (clientTime) => socket.emit('sync_pong', { clientTime, serverTime: Date.now() }));
 
   // --- NEW: CLOUD HISTORY LOGIC ---
-  socket.on('get_cloud_history', (syncKey) => {
-    const hist = userHistory.get(syncKey) || [];
-    socket.emit('cloud_history_data', hist);
+  const hashPassword = (pwd) => pwd ? crypto.createHash('sha256').update(pwd).digest('hex') : '';
+
+  socket.on('get_cloud_history', (req) => {
+    let syncKey = req;
+    let password = '';
+    if (typeof req === 'object' && req !== null) {
+      syncKey = req.syncKey;
+      password = req.password || '';
+    }
+
+    let histEntry = userHistory.get(syncKey);
+
+    // Backwards compatibility for arrays
+    if (Array.isArray(histEntry)) {
+      histEntry = { password: '', data: histEntry };
+      userHistory.set(syncKey, histEntry);
+      saveHistoryDB();
+    }
+
+    if (!histEntry) {
+      socket.emit('cloud_history_data', []);
+      return;
+    }
+
+    const hashedInput = hashPassword(password);
+    if (histEntry.password !== '' && histEntry.password !== hashedInput) {
+      socket.emit('cloud_error', 'Invalid password for this Cloud Sync ID.');
+      return;
+    }
+
+    socket.emit('cloud_history_data', histEntry.data);
   });
 
-  socket.on('save_cloud_history', ({ syncKey, data }) => {
-    userHistory.set(syncKey, data);
+  socket.on('save_cloud_history', ({ syncKey, password = '', data }) => {
+    let histEntry = userHistory.get(syncKey);
+
+    if (Array.isArray(histEntry)) {
+      histEntry = { password: '', data: histEntry };
+    }
+
+    const hashedInput = hashPassword(password);
+    if (histEntry && histEntry.password !== '' && histEntry.password !== hashedInput) {
+      socket.emit('cloud_error', 'Invalid password for this Cloud Sync ID.');
+      return;
+    }
+
+    // Allow user to set/update the password if the existing password is empty
+    // OR if the provided password matches the existing one.
+    userHistory.set(syncKey, { password: hashedInput, data });
     saveHistoryDB();
   });
   // ---------------------------------

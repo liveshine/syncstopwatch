@@ -322,6 +322,8 @@
             <div class="setting-group" id="cloud-id-group" style="display: none;">
               <label>Cloud Sync ID</label>
               <input type="text" id="cloud-sync-id" autocomplete="off">
+              <label>Password</label>
+              <input type="password" id="cloud-password" autocomplete="off" placeholder="Leave blank if none">
               <button id="btn-fetch-cloud" class="btn-primary" style="margin-top: 5px;">Fetch Cloud Data</button>
             </div>
           </div>
@@ -677,18 +679,22 @@
   let historyData = [];
   let storageMode = localStorage.getItem('storageMode') || 'local';
   let cloudSyncKey = localStorage.getItem('cloudSyncKey') || Math.random().toString(36).substr(2, 9).toUpperCase();
+  let cloudPassword = localStorage.getItem('cloudPassword') || '';
   let lastSavedElapsed = -1; 
   
   localStorage.setItem('cloudSyncKey', cloudSyncKey);
+  localStorage.setItem('cloudPassword', cloudPassword);
   
   const $storageSelect = document.getElementById('storage-select');
   const $localWarning = document.getElementById('local-warning');
   const $cloudIdGroup = document.getElementById('cloud-id-group');
   const $cloudSyncId = document.getElementById('cloud-sync-id');
+  const $cloudPassword = document.getElementById('cloud-password');
   const $historyList = document.getElementById('history-list');
   const $btnFetchCloud = document.getElementById('btn-fetch-cloud');
   
   $cloudSyncId.value = cloudSyncKey;
+  $cloudPassword.value = cloudPassword;
   $storageSelect.value = storageMode;
   updateStorageUI();
 
@@ -700,7 +706,7 @@
     } else {
       $localWarning.style.display = 'none';
       $cloudIdGroup.style.display = 'flex';
-      socket.emit('get_cloud_history', cloudSyncKey);
+      socket.emit('get_cloud_history', { syncKey: cloudSyncKey, password: cloudPassword });
     }
   }
 
@@ -712,8 +718,10 @@
 
   $btnFetchCloud.onclick = () => {
     cloudSyncKey = $cloudSyncId.value.trim();
+    cloudPassword = $cloudPassword.value;
     localStorage.setItem('cloudSyncKey', cloudSyncKey);
-    socket.emit('get_cloud_history', cloudSyncKey);
+    localStorage.setItem('cloudPassword', cloudPassword);
+    socket.emit('get_cloud_history', { syncKey: cloudSyncKey, password: cloudPassword });
   };
 
   function loadLocalHistory() {
@@ -728,12 +736,16 @@
     renderHistoryUI();
   });
 
+  socket.on('cloud_error', (msg) => {
+    alert(msg);
+  });
+
   function persistHistory() {
     if (storageMode === 'local') {
       localStorage.setItem('timerHistory', JSON.stringify(historyData));
       renderHistoryUI();
     } else {
-      socket.emit('save_cloud_history', { syncKey: cloudSyncKey, data: historyData });
+      socket.emit('save_cloud_history', { syncKey: cloudSyncKey, password: cloudPassword, data: historyData });
       renderHistoryUI();
     }
   }
