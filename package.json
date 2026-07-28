@@ -1,9 +1,14 @@
 {
   "name": "sync-stopwatch",
   "version": "1.0.0",
-  "scripts": { "start": "node server.js" },
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "express": "^5",
     "socket.io": "^4"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.4.0"
   }
 }
