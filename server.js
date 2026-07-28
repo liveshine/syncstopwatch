@@ -92,6 +92,7 @@ io.on('connection', socket => {
 
   socket.on('lap', () => {
     if (!canControl(socket.id) || !room.isRunning) return;
+    if (room.laps.length >= 100) return;
     const current = Date.now() - room.startTime;
     room.laps.push(current);
     io.to(roomId).emit('audio_cue', 'lap'); broadcast();
