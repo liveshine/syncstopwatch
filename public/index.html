@@ -776,14 +776,33 @@
     historyData.forEach(item => {
       const li = document.createElement('li');
       li.className = 'history-item';
-      li.innerHTML = `
-        <div class="history-item-header">
-          <span>${item.date}</span>
-          <span>Room: ${item.room}</span>
-        </div>
-        <div class="history-item-time">${item.time} ${item.mode === 'countdown' ? '(Timer)' : ''}</div>
-        ${item.lapsCount > 0 ? `<div class="history-item-laps">${item.lapsCount} Laps recorded</div>` : ''}
-      `;
+
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'history-item-header';
+
+      const dateSpan = document.createElement('span');
+      dateSpan.textContent = item.date;
+
+      const roomSpan = document.createElement('span');
+      roomSpan.textContent = `Room: ${item.room}`;
+
+      headerDiv.appendChild(dateSpan);
+      headerDiv.appendChild(roomSpan);
+
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'history-item-time';
+      timeDiv.textContent = `${item.time} ${item.mode === 'countdown' ? '(Timer)' : ''}`;
+
+      li.appendChild(headerDiv);
+      li.appendChild(timeDiv);
+
+      if (item.lapsCount > 0) {
+        const lapsDiv = document.createElement('div');
+        lapsDiv.className = 'history-item-laps';
+        lapsDiv.textContent = `${item.lapsCount} Laps recorded`;
+        li.appendChild(lapsDiv);
+      }
+
       $historyList.appendChild(li);
     });
   }
